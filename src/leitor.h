@@ -80,7 +80,7 @@ typedef struct {
 
       struct{   
           u2 length;
-          u1 bytes[];
+          u1* bytes;
       }Utf8;                      //valor = 1
 
       struct{
@@ -97,6 +97,7 @@ typedef struct {
           u2 name_and_type_index;
       }InvokeDynamic_info;        // valor = 18
     } Const;
+
 } cp_info;
 
 
@@ -122,9 +123,10 @@ class ClassFile {
 
 ClassFile readClassFile(const string &path);
 
+void showExcept(const string &msg);
 
 // Lembrar de tirar caso nao use em outros arquivos
-u1 readByte(fstream &fp);
+u1 read1Byte(fstream &fp);
 
 u2 read2Byte(fstream &fp);
 

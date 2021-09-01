@@ -3,22 +3,24 @@
 // Mostra o erro no terminal e encerra o programa
 void showExcept(const string &msg) {
 
-    cout << "Erro: " << msg << "\n";
-    cout << "Terminando o programa\n";
+    cerr << "Erro: " << msg << "\n";
+    cerr << "Terminando o programa\n";
     exit(EXIT_FAILURE);
 }
 
 // Le a quantidade de bytes presentes em total_bytes do arquivo apontado por 
 // file, e armazena no array byteArray
-void readBytes(u1 byteArray[], size_t total_bytes, fstream &file) {
-    byteArray = new u1[total_bytes];
+u1* readBytes(u2 total_bytes, fstream &file) {
+    u1 *byteArray = new u1[total_bytes];
 
     for(int it = 0; it < total_bytes; it++) {
-        byteArray[it] = readByte(file);
-
+        byteArray[it] = read1Byte(file);
+        // cout << byteArray[it] << endl;
         if(byteArray[it] == 0 or byteArray[it] >= ((u1)240) and byteArray[it] <= ((u1)255))
             showExcept("Byte lido de constante em UTF-8 invalido!");
     }
+
+    return byteArray;
 }
 
 vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
@@ -29,7 +31,7 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
     vector<cp_info> cp(cp_count - 1);
 
     for(int i = 0; i < cp.size(); i++) {
-        u1 tag = readByte(file);
+        u1 tag = read1Byte(file);
 
         switch (tag) {
             case Class_info_value:
@@ -39,7 +41,8 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
             case Utf8_info_value:
                 cp[i].Const.Utf8.length = read2Byte(file);
 
-                readBytes(cp[i].Const.Utf8.bytes, cp[i].Const.Utf8.length, file);
+                cp[i].Const.Utf8.bytes = readBytes(cp[i].Const.Utf8.length, file);
+                
                 // throw "Nao feito ainda"; // <-- Erro // Basta arrumar então
                 break;
                 
@@ -86,12 +89,12 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
                 break;
               
             case Method_Hand_info_value:
-                cp[i].Const.MethodHandle_info.reference_kind = readByte(file);
+                cp[i].Const.MethodHandle_info.reference_kind = read1Byte(file);
                 cp[i].Const.MethodHandle_info.reference_index = read2Byte(file);
                 break;
               
             case Method_Type_info_value:
-                cp[i].Const.MethodType_info.descriptor_index = readByte(file);
+                cp[i].Const.MethodType_info.descriptor_index = read1Byte(file);
                 break;
               
             case Inv_Dyn_info_value:
@@ -156,7 +159,7 @@ ClassFile readClassFile(const string &path){
     return myClass;
 }
 
-u1 readByte(fstream &file) {
+u1 read1Byte(fstream &file) {
     u1 byte;
     char my_byte[1];
 
@@ -174,8 +177,8 @@ u1 readByte(fstream &file) {
 u2 read2Byte(fstream &file){
     u2 byte2;
     
-    byte2 = readByte(file);
-    byte2 = (byte2 << 8) | readByte(file);
+    byte2 = read1Byte(file);
+    byte2 = (byte2 << 8) | read1Byte(file);
 }
 
 u4 read4Byte(fstream &file){

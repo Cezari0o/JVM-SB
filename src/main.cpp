@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-    string caminho = "java_files/class_file/Sum.class";
+    string caminho = "java_files/class_file/Sumç.class";
    
 
     ClassFile teste = readClassFile(caminho);
@@ -19,7 +19,7 @@ int main() {
     // cout << teste.major_version << endl;
     // cout << teste.constant_pool_count << endl;
 
-    showClassFile(teste);    
+    showClassFile(teste, cout);    
 
     return 0; //sales = vendas
 }
