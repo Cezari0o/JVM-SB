@@ -8,16 +8,20 @@ void showExcept(const string &msg) {
     exit(EXIT_FAILURE);
 }
 
+bool isIdxtoCP(const u2 &idx, const std::vector<cp_info> &cp) {
+    return idx >= 1 and idx < cp.size() + 1;
+}
+
 // Le a quantidade de bytes presentes em total_bytes do arquivo apontado por 
 // file, e armazena no array byteArray
-u1* readBytes(u2 total_bytes, fstream &file) {
+u1* readBytes(u4 total_bytes, fstream &file) {
     u1 *byteArray = new u1[total_bytes];
 
     for(int it = 0; it < total_bytes; it++) {
         byteArray[it] = read1Byte(file);
         // cout << byteArray[it] << endl;
-        if(byteArray[it] == 0 or byteArray[it] >= ((u1)240) and byteArray[it] <= ((u1)255))
-            showExcept("Byte lido de constante em UTF-8 invalido!");
+        // if(byteArray[it] == 0 or byteArray[it] >= ((u1)240) and byteArray[it] <= ((u1)255))
+        //     showExcept("Byte lido de constante em UTF-8 invalido!");
     }
 
     return byteArray;
@@ -129,6 +133,24 @@ vector<u2> readInterfaces(fstream &file, u2 interfaces_count, u2 const_pool_coun
     return interfaces_idx;
 }
 
+std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, const vector<cp_info> &cp) {
+    std::vector<field_info> fields(total_fields);
+
+    showExcept("Nao testado ainda");
+    for(int i = 0; i < fields.size(); i++) {
+        field_info* f = new field_info;
+
+        f->acces_flags      = read2Byte(file);
+        f->name_index       = read2Byte(file);
+        f->descriptor_index = read2Byte(file);
+        f->attributes_count = read2Byte(file);
+        // f->attributes       = readAttr(file, cp);
+        fields.at(i) = *f;
+    }
+
+    return fields;
+}
+
 ClassFile readClassFile(const string &path){
     fstream file;
     ClassFile myClass;
@@ -154,6 +176,9 @@ ClassFile readClassFile(const string &path){
     myClass.interfaces_count    = read2Byte(file);
     
     myClass.interfaces          = readInterfaces(file, myClass.interfaces_count, myClass.constant_pool_count);
+
+    myClass.fields_count        = read2Byte(file);
+    // myClass.fields              = readFields(file, myClass.fields_count);
     file.close();
 
     return myClass;

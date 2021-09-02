@@ -4,7 +4,10 @@
 // #include <iostream>
 // #include <vector>
 // #include <string>
+// #include <map>
+// #include <util>
 #include <bits/stdc++.h>
+#include "attr_functions.h"
 
 using namespace std;
 
@@ -23,10 +26,93 @@ using namespace std;
 #define Method_Type_info_value 16
 #define Inv_Dyn_info_value     18
 
-typedef unsigned char u1;
+typedef unsigned char  u1;
 typedef unsigned short u2;
-typedef unsigned int u4;
-typedef unsigned long u8;
+typedef unsigned int   u4;
+typedef unsigned long  u8;
+
+// Estruturas auxiliares de atributos
+typedef struct {
+    u2 start_pc;
+    u2 end_pc;
+    u2 handler_pc;
+    u2 catch_type;
+} exception_table;
+
+typedef struct {
+    u2 start_pc;
+    u2 line_number;
+} line_number_table;
+
+typedef struct {
+    u2 start_pc;
+    u2 length;
+    u2 name_index;
+    u2 descriptor_index;
+    u2 index;
+} local_variable_table;
+
+typedef struct {
+    u2 att_name_idx;
+    u4 att_length;
+
+    union {
+        struct {
+            u2 constValue_index;
+        } ConstValue;
+
+        struct {
+            u2 max_stack;
+            u2 max_locals;
+            u4 code_length;
+            u1* code;
+            u2 exception_table_length;
+            exception_table* except_tb_array; // >-<
+            u2 attributes_count;
+            attribute_info* attributes;
+
+        } Code;
+
+        struct {
+            u2 number_of_exceptions;
+            u2* exception_index_table_array;
+        } Exceptions;
+
+        // struct { // Ainda nao feito...
+        //     u2 number_of_entries;
+        //     // stack_map_frame entries[number_of_entries];
+        // } StackMapTable;
+
+        struct {
+            u2 line_number_table_length;
+            line_number_table* l_num_table_array;
+        } LineNumberTable;
+
+        struct {
+            u2 local_variable_table_length;
+            local_variable_table* lv_tb_array;
+
+        } LocalVariableTable;
+
+        struct {
+            u2 sourcefile_index;
+        } SourceFile;
+
+        u1* info;
+
+    } attr;
+
+} attribute_info;
+
+typedef struct {
+    u2 acces_flags;
+    u2 name_index;
+    u2 descriptor_index;
+    u2 attributes_count;
+    attribute_info* attributes;
+
+} field_info;
+
 
 typedef struct {
     u1 tag;
@@ -107,7 +193,7 @@ class ClassFile {
       u2 minor_version;
       u2 major_version;
       u2 constant_pool_count;
-      vector<cp_info> constant_pool;
+      std::vector<cp_info> constant_pool;
       u2 access_flags;
       u2 this_class;
       u2 super_class;
@@ -115,7 +201,8 @@ class ClassFile {
       vector<u2> interfaces;
       u2 fields_count;
       // field_info fields [fields_count];
-      u2 methods_count;
+      std::vector<field_info> fields;
+    //   u2 methods_count;
       // method_info methods [methods_count];
       // u2 attributes_count;
       // attribute_info attributes [attributes_count];
@@ -124,6 +211,7 @@ class ClassFile {
 ClassFile readClassFile(const string &path);
 
 void showExcept(const string &msg);
+bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp);
 
 // Lembrar de tirar caso nao use em outros arquivos
 u1 read1Byte(fstream &fp);
@@ -132,6 +220,7 @@ u2 read2Byte(fstream &fp);
 
 u4 read4Byte(fstream &fp);
 
+u1* readBytes(u4 total_bytes, fstream &file);
 
 #endif
 

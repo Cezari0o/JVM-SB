@@ -1,7 +1,7 @@
 #include <iostream>
+#include <string>
 #include "leitor.h"
 #include "exibidor.h"
-#include <string>
 
 using namespace std;
 
