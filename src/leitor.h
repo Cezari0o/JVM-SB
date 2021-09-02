@@ -7,7 +7,6 @@
 // #include <map>
 // #include <util>
 #include <bits/stdc++.h>
-#include "attr_functions.h"
 
 using namespace std;
 
@@ -52,7 +51,7 @@ typedef struct {
     u2 index;
 } local_variable_table;
 
-typedef struct {
+typedef struct attr_info {
     u2 att_name_idx;
     u4 att_length;
 
@@ -69,7 +68,7 @@ typedef struct {
             u2 exception_table_length;
             exception_table* except_tb_array; // >-<
             u2 attributes_count;
-            attribute_info* attributes;
+            struct attr_info* attributes;
 
         } Code;
 

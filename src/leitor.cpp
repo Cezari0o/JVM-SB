@@ -8,7 +8,7 @@ void showExcept(const string &msg) {
     exit(EXIT_FAILURE);
 }
 
-bool isIdxtoCP(const u2 &idx, const std::vector<cp_info> &cp) {
+bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp) {
     return idx >= 1 and idx < cp.size() + 1;
 }
 

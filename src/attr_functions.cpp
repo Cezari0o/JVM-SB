@@ -55,7 +55,7 @@ int readCode(std::fstream &file, attribute_info &att, const std::vector<cp_info>
 
             alo = readAttr(file, cp);
 
-            att.attr.Code.attributes[i] = alo;
+            att.attr.Code.attributes[i] = *alo;
         }
     }
 

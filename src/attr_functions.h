@@ -12,7 +12,7 @@
 typedef int attr_func(std::fstream &file, attribute_info &att,const std::vector<cp_info> &cp);
 
 int readConstant(std::fstream &file, attribute_info &att, const std::vector<cp_info> &cp);
-int readCode(attribute_info &att, const vector<cp_info> &cp);
+int readCode(std::fstream &file, attribute_info &att, const vector<cp_info> &cp);
 int readExceptions(std::fstream &file, attribute_info &att,const std::vector<cp_info> &cp);
 // int readStackMapTable(std::fstream &file, attribute_info &att,const std::vector<cp_info> &cp);
 int readLineNumberTable(std::fstream &file, attribute_info &att,const std::vector<cp_info> &cp);
