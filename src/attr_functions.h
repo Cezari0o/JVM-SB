@@ -31,6 +31,19 @@ static std::map<std::string, attr_func*> func_map = {
                                                 {"LocalVariableTable", readLocalVariableTable}
                                             };
 
+/**
+ * readAttr. 
+ *
+ * Essa funcao le o proximo atributo presente no arquivo apontado por file.
+ * Retorna uma attribute_info. Pode parar o programa. 
+ * @author	@Cezari0o
+ * @since	v0.0.1
+ * @version	v1.0.0	Thursday, September 2nd, 2021.
+ * @global
+ * @param	fstream	&file	
+ * @param	mixed  	&cp  	
+ * @return	attribute_info
+ */
 attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp);
 
 #endif

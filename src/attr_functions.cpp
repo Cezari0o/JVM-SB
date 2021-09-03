@@ -168,4 +168,6 @@ attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp) {
             read1Byte(file);
         }
     }
+
+    return att;
 }

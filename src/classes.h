@@ -77,17 +77,25 @@ typedef struct attribute_info {
 
 } attribute_info;
 
-typedef struct {
-    u2 acces_flags;
+typedef struct field_info {
+    u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
     u2 attributes_count;
     attribute_info* attributes;
 
 } field_info;
+    
+typedef struct method_info {
+    u2 access_flags;
+    u2 name_index;
+    u2 descriptor_index;
+    u2 attributes_count;
+    attribute_info* attributes;
+} method_info;
 
 
-typedef struct {
+typedef struct cp_info {
     u1 tag;
 
     union {
@@ -173,12 +181,11 @@ class ClassFile {
       u2 interfaces_count;
       std::vector<u2> interfaces;
       u2 fields_count;
-    //   field_info fields [fields_count];
       std::vector<field_info> fields;
-    //   u2 methods_count;
-      // method_info methods [methods_count];
-      // u2 attributes_count;
-      // attribute_info attributes [attributes_count];
+      u2 methods_count;
+      std::vector<method_info> methods;
+      u2 attributes_count;
+      std::vector<attribute_info> attributes; 
 };
 
 bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp);

@@ -84,16 +84,19 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp) {
             
         case Method_Hand_info_value:
             result += "<Method Handle> \n";
+            getUtf8Const(cp[cinfo.Const.MethodHandle_info.reference_index - 1])
+            + "\nTipo: " +
+            getUtf8Const(cp[cinfo.Const.MethodHandle_info.reference_kind - 1]);
             break;
             
         case Method_Type_info_value:
             result += "<Method Type> \n";
-
+            getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
             break;
             
         case Inv_Dyn_info_value:
             result += "<Invoke Dynamic> \n";
-
+            getUtf8Const(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1]);
             break;
             
         default:
@@ -130,22 +133,84 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
 
     outstream << "Minor version: " << cf.minor_version << endl;
     outstream << "Major version: " << cf.major_version << endl;
-    outstream << "Numero de Constantes no pool : " << cf.constant_pool_count - 1 << endl;    
+    outstream << "Constant pool count: " << cf.constant_pool_count << endl;    
     outstream << "Classe do arquivo: " << cf.this_class << endl; // Indice para o pool de constantes
     outstream << "Super classe : " << cf.super_class << endl; // Indice para o pool de constantes
     outstream << "Total de Interfaces : " << cf.interfaces_count << endl;
+    outstream << "Total de Fields : " << cf.fields_count << endl;
+    outstream << "Total de Métodos : " << cf.methods_count << endl;
 }
+
+void showInterfaces(const ClassFile &cf, std::ostream &outstream){
+    outstream << "-- Interfaces --\n";
+    if(cf.interfaces_count>0){
+        for(u2 i =0; i<cf.interfaces_count;i++){
+            outstream << cf.interfaces[i] << endl;
+        }
+    }
+    
+}
+
+void showFields(const ClassFile &cf, std::ostream &outstream){
+    outstream << "-- Fields --\n";
+    outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
+    outstream.setf(ios_base::showbase);
+    if(cf.fields_count>0){
+        for(u2 i =0; i<cf.fields_count;i++){
+            std::string field_name = getUtf8Const(cf.constant_pool.at(cf.fields.at(i).name_index - 1));
+            std::string field_descriptor = getUtf8Const(cf.constant_pool.at(cf.fields.at(i).descriptor_index - 1));
+
+            outstream << "[" << i << "] " << field_name << endl;
+            outstream << "Flags de acesso : "<< cf.fields[i].access_flags << endl;
+
+            outstream << "Descriptor: " << field_descriptor << endl;
+            outstream << "Num. de Atributos :" << cf.fields[i].attributes_count << endl;
+
+        }
+    }
+
+    // Resetando as flags
+    outstream.unsetf(ios_base::basefield);
+    outstream.unsetf(ios_base::showbase);
+}
+
+void showMethods(const ClassFile &cf, std::ostream &outstream) {
+    outstream << "-- Methods --\n";
+    outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
+    outstream.setf(ios_base::showbase);
+    
+    if(cf.methods_count > 0) {
+        
+        for(int i = 0; i < cf.methods_count; i++) {
+            std::string method_name = getUtf8Const(cf.constant_pool.at(cf.methods.at(i).name_index - 1));
+            std::string method_descriptor = getUtf8Const(cf.constant_pool.at(cf.methods.at(i).descriptor_index - 1));
+
+            outstream << "[" << i << "] " << method_name << endl;
+            outstream << "Flags de acesso : "<< cf.methods[i].access_flags << endl;
+            outstream << "Descriptor: " << method_descriptor << endl;
+            outstream << "Num. de Atributos :" << cf.methods[i].attributes_count << endl;
+            // P(r)intar os atributos
+        }
+    }
+
+    // Resetando as flags
+    outstream.unsetf(ios_base::basefield);
+    outstream.unsetf(ios_base::showbase);
+
+}
+
+void showAttributes(const ClassFile &cf, std::ostream &outstream){}//faz ai
 
 void showClassFile(const ClassFile &myClassFile, std::ostream &outstream) {
     std::setlocale(LC_ALL, "");
 
-    cout << "--- Exibindo os dados lidos do arquivo class ---\n\n";
+    outstream << "--- Exibindo os dados lidos do arquivo class ---\n\n";
     showGeneralInformation(myClassFile, outstream);
-    cout << endl;
+    outstream << endl;
     showConstantPool(myClassFile, outstream);
-    // showInterfaces(myClassFile);
-    // showFields(myClassFile);
-    // showMethods(myClassFile);
-    // showAttributes(myClassFile);
-    cout << "\n--- Fim da exibicao ---\n";
+    showInterfaces(myClassFile, outstream);
+    showFields(myClassFile, outstream);
+    showMethods(myClassFile, outstream);
+    // showAttributes(myClassFile, outstream);
+    outstream << "\n--- Fim da exibicao ---\n";
 }

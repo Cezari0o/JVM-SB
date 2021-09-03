@@ -107,24 +107,85 @@ vector<u2> readInterfaces(fstream &file, u2 interfaces_count, u2 const_pool_coun
     return interfaces_idx;
 }
 
-
-
 std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, const vector<cp_info> &cp) {
-    std::vector<field_info> fields(total_fields);
+    std::vector<field_info> fields;
 
-    showExcept("Nao testado ainda");
-    for(int i = 0; i < fields.size(); i++) {
-        field_info* f = new field_info;
+    if(total_fields > 0) {
+        fields.resize(total_fields);
 
-        f->acces_flags      = read2Byte(file);
-        f->name_index       = read2Byte(file);
-        f->descriptor_index = read2Byte(file);
-        f->attributes_count = read2Byte(file);
-        // f->attributes       = readAttr(file, cp);
-        fields.at(i) = *f;
+        for(int i = 0; i < fields.size(); i++) {
+            field_info* f = new field_info;
+
+            f->access_flags     = read2Byte(file);
+            f->name_index       = read2Byte(file);
+            f->descriptor_index = read2Byte(file);
+            f->attributes_count = read2Byte(file);
+            f->attributes       = new attribute_info[f->attributes_count];
+
+            for(int j = 0; j < f->attributes_count; j++) {
+                attribute_info* attr_f = readAttr(file, cp);
+                
+                f->attributes[j] = *attr_f;
+
+                delete attr_f;
+            }
+
+            fields.at(i) = *f;
+
+            delete f;
+        }
     }
 
+
     return fields;
+}
+
+std::vector<method_info> readmethods(std::fstream &file, const u2 &total_methods, const vector<cp_info> &cp){
+    std::vector<method_info> methods;
+    
+    if(total_methods > 0) {
+        methods.resize(total_methods);
+
+        for(int i = 0; i < methods.size(); i++) {
+            method_info* m = new method_info;
+
+            m->access_flags     = read2Byte(file);
+            m->name_index       = read2Byte(file);
+            m->descriptor_index = read2Byte(file);
+            m->attributes_count = read2Byte(file);
+            m->attributes       = new attribute_info[m->attributes_count];
+
+            for(int j = 0; j < m->attributes_count; j++) {
+                attribute_info* attr_m = readAttr(file, cp);
+                
+                m->attributes[j] = *attr_m;
+
+                delete attr_m;
+            }
+
+            methods.at(i) = *m;
+
+            delete m;
+        }
+    }
+
+    return methods;
+}
+
+std::vector<attribute_info> readClassFileAttributes(std::fstream &file, const u2 &totalAttr, const std::vector<cp_info> &cp) {
+    std::vector<attribute_info> someAttributes(totalAttr);
+
+    for(int i = 0; i < totalAttr; i++) {
+        attribute_info* attr_cf;
+
+        attr_cf = readAttr(file, cp);
+        
+        someAttributes[i] = *attr_cf;
+
+        delete attr_cf;
+    }
+
+    return someAttributes;
 }
 
 ClassFile readClassFile(const string &path){
@@ -154,7 +215,14 @@ ClassFile readClassFile(const string &path){
     myClass.interfaces          = readInterfaces(file, myClass.interfaces_count, myClass.constant_pool_count);
 
     myClass.fields_count        = read2Byte(file);
-    // myClass.fields              = readFields(file, myClass.fields_count);
+    myClass.fields              = readFields(file, myClass.fields_count, myClass.constant_pool);
+
+    myClass.methods_count       = read2Byte(file);
+    myClass.methods             = readmethods(file, myClass.methods_count, myClass.constant_pool);
+
+    myClass.attributes_count    = read2Byte(file);
+    myClass.attributes          = readClassFileAttributes(file, myClass.attributes_count, myClass.constant_pool);
+
     file.close();
 
     return myClass;

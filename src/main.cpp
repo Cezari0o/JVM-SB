@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-    string caminho = "java_files/class_file/Sumç.class";
+    string caminho;
    
     std::cout << "Digite o caminho do arquivo: ";
     std::cin >> caminho;
