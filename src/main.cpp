@@ -8,6 +8,8 @@ using namespace std;
 int main() {
     string caminho = "java_files/class_file/Sumç.class";
    
+    std::cout << "Digite o caminho do arquivo: ";
+    std::cin >> caminho;
 
     ClassFile teste = readClassFile(caminho);
 

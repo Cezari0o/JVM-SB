@@ -20,7 +20,7 @@ int readCode(std::fstream &file, attribute_info &att, const std::vector<cp_info>
 
     att.attr.Code.code_length = read4Byte(file);
     if(not (att.attr.Code.code_length > 0 and att.attr.Code.code_length < 65536)) {
-        showExcept("[Code] Tamanho do atributo code_length invalido. Tam = " + to_string(att.attr.Code.code_length));
+        showExcept("[Code] Tamanho do atributo code_length invalido. Tam = " + std::to_string(att.attr.Code.code_length));
     }
 
     att.attr.Code.code = readBytes(att.attr.Code.code_length, file);
@@ -55,7 +55,7 @@ int readCode(std::fstream &file, attribute_info &att, const std::vector<cp_info>
 
             alo = readAttr(file, cp);
 
-            att.attr.Code.attributes[i] = *alo;
+            att.attr.Code.attributes[i] = *alo; // <- Talvez tenha erro aqui, vazamento de memoria
         }
     }
 
@@ -151,7 +151,7 @@ attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp) {
 
     if(!validConstPoolAccess(att->att_name_idx, cp)) {
         std::string msg = "[Atributos] Indice de acesso invalido para o pool de constantes\n";
-        msg += "idx acessado = " + to_string((unsigned int) att->att_name_idx);
+        msg += "idx acessado = " + std::to_string((unsigned int) att->att_name_idx);
         showExcept(msg);
     }
 
@@ -163,10 +163,9 @@ attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp) {
 
     else {
 
+        // Nao lancar excessoes !!!
         for(int i = 0; i < att->att_length; i++) { // Lendo somente para ajuste do ponteiro de arquivo
             read1Byte(file);
         }
-        // Decidir o que fazer para atributos nao implementados
-        // Nao lancar excessoes !!!
     }
 }

@@ -4,11 +4,10 @@
 #include <ostream>
 #include <string>
 #include "leitor.h"
+#include "classes.h"
 
 #define endl "\n"
 
 void showClassFile(const ClassFile &myClass, std::ostream &outstream);
-void showExcept(const std::string &msg);
-std::string getUtf8Const(const cp_info &const_info);
 
 #endif
