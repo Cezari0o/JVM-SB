@@ -1,6 +1,6 @@
 
-java_files/class_file
-*.class
+compila.txt
+caminho_arquivo.txt
 leitor
 teste
 .vscode
