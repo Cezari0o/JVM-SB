@@ -1,12 +1,12 @@
 #include "leitor.h"
 
 
-vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
+std::vector<cp_info> readConstantPool(std::fstream &file, u2 cp_count) {
 
     if(cp_count < 1)
         showExcept("Constant_pool_count invalido!");
 
-    vector<cp_info> cp(cp_count - 1);
+    std::vector<cp_info> cp(cp_count - 1);
 
     for(int i = 0; i < cp.size(); i++) {
         u1 tag = read1Byte(file);
@@ -96,14 +96,14 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
     return cp;
 }
 
-vector<u2> readInterfaces(fstream &file, u2 interfaces_count, u2 const_pool_count) {
-    vector<u2> interfaces_idx(interfaces_count);
+std::vector<u2> readInterfaces(std::fstream &file, u2 interfaces_count, u2 const_pool_count) {
+    std::vector<u2> interfaces_idx(interfaces_count);
 
     for(u2 &it : interfaces_idx) {
         it = read2Byte(file);
 
         if(not (it >= 1 and it < const_pool_count)) {
-            string msg = "Indice no array de interfaces nao eh uma entrada valida no pool ";
+            std::string msg = "Indice no array de interfaces nao eh uma entrada valida no pool ";
             msg = msg + " de constantes"; 
             showExcept(msg);
         }
@@ -112,7 +112,7 @@ vector<u2> readInterfaces(fstream &file, u2 interfaces_count, u2 const_pool_coun
     return interfaces_idx;
 }
 
-std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, const vector<cp_info> &cp) {
+std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, const std::vector<cp_info> &cp) {
     std::vector<field_info> fields;
 
     if(total_fields > 0) {
@@ -145,7 +145,7 @@ std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, c
     return fields;
 }
 
-std::vector<method_info> readmethods(std::fstream &file, const u2 &total_methods, const vector<cp_info> &cp){
+std::vector<method_info> readmethods(std::fstream &file, const u2 &total_methods, const std::vector<cp_info> &cp){
     std::vector<method_info> methods;
     
     if(total_methods > 0) {
@@ -193,8 +193,8 @@ std::vector<attribute_info> readClassFileAttributes(std::fstream &file, const u2
     return someAttributes;
 }
 
-ClassFile readClassFile(const string &path){
-    fstream file;
+ClassFile readClassFile(const std::string &path){
+    std::fstream file;
     ClassFile myClass;
 
     file.open(path, std::fstream::in | std::fstream::binary);

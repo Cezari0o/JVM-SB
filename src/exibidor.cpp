@@ -19,6 +19,38 @@ std::string getTabs(int count) {
     return tabs;
 }
 
+std::string getAccessFlagString(u2 flags, int type) {
+
+    // type -> class_file = 0, fields = 1, method = 2, 
+
+    std::vector<std::pair<u2, std::vector<std::string>>> stringMask = {
+        {0x0001,  {"ACC_PUBLIC", "ACC_PUBLIC", "ACC_PUBLIC"}},
+        {0x0002,  {"ACC_PRIVATE", "ACC_PRIVATE", "ACC_PRIVATE"}},
+        {0x0004,  {"ACC_PROTECTED", "ACC_PROTECTED", "ACC_PROTECTED"}},
+        {0x0008,  {"ACC_STATIC", "ACC_STATIC", "ACC_STATIC"}},
+        {0x0010,  {"ACC_FINAL", "ACC_FINAL", "ACC_FINAL"}},
+        {0x0020,  {"ACC_SUPER", "", "ACC_SYNCHRONIZED"}},
+        {0x0040,  {"ACC_BRIDGE", "ACC_VOLATILE", "ACC_BRIDGE"}},
+        {0x0080,  {"ACC_VARARGS", "ACC_TRANSIENT", "ACC_VARARGS"}},
+        {0x0100,  {"ACC_NATIVE", ""," ACC_NATIVE"}},
+        {0x0200,  {"ACC_INTERFACE", "",""}},
+        {0x0400,  {"ACC_ABSTRACT", "", "ACC_ABSTRACT"}},
+        {0x0800,  {"ACC_STRICT", "", "ACC_STRICT"}},
+        {0x1000,  {"ACC_SYNTHETIC", "ACC_SYNTHETIC", "ACC_SYNTHETIC"}},
+        {0x2000,  {"ACC_ANNOTATION", "", ""}},
+        {0x4000,  {"ACC_ENUM", "ACC_ENUM", ""}}
+    };
+
+
+    for(auto &it : stringMask) {
+        if(flags == it.first) {
+            return it.second[type];
+        }
+    }
+
+    return "ACC_FLAG_PUBLIC";
+}
+
 std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bool is_recursive) {
     std::string result = "";
     int temp;
@@ -246,7 +278,7 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
     outstream.setf(ios_base::showbase);
 
     outstream << "Magic number: " << cf.magic << endl;
-    outstream << "Flags de acesso: " << cf.access_flags << endl;
+    outstream << "Flags de acesso: " << cf.access_flags << " " << getAccessFlagString(cf.access_flags, CLASS_FILE_TYPE) << endl;
 
     // Resetando as flags
     outstream.unsetf(ios_base::basefield);
@@ -266,24 +298,60 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
 }
 
 void showInterfaces(const ClassFile &cf, std::ostream &outstream){
-    outstream << "-- Interfaces --\n";
+    outstream << "-- Interfaces --\n\n";
     if(cf.interfaces_count>0){
         for(u2 i =0; i<cf.interfaces_count;i++){
-            outstream << cf.interfaces[i] << endl;
+            outstream << "[" << i << "] cp_info#" << cf.interfaces[i] << endl;
+            outstream << "Super interface: " << 
+            constantToString(cf.constant_pool.at(cf.interfaces[i] - 1), cf.constant_pool, true) << "\n\n";
         }
     }
-    
+    outstream << endl;
+
+}
+
+std::string getStringOpcode(const u1 &opcode, const std::vector<cp_info> &cp) {
+    std::vector<std::pair<u2, std::string>> mnemonicos = init_opcode_list();
+
+    for(int i = 0; i < mnemonicos.size(); i++) {
+        if(mnemonicos.at(i).first == opcode) {
+            return mnemonicos.at(i).second;
+        }
+    }
+
+    return "Null";
 }
 
 void printCode(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
     
-    outstream << "<Code>\n";
+    outstream << "<Code>\n\n";
     outstream << "Max Stacks:  " << att.attr.Code.max_stack << endl; // (ㆆ_ㆆ)
     outstream << "Max Local:   " << att.attr.Code.max_locals << endl; // (ง︡'-'︠)ง
     outstream << "Code Length: " << att.attr.Code.code_length << endl; // ╍●‿●╍
-    // outstream << "Code:        " << att.code << endl;
-    outstream << "Exeption Table Length: " << att.attr.Code.exception_table_length << endl;
-    // outstream << "Except tb Array:  " << att.attr.Ex << endl;
+    outstream << "Bytecode:    " << endl;
+
+    outstream.setf(ios_base::internal, ios_base::adjustfield);
+    for(int i = 0; i < att.attr.Code.code_length; i++) {
+        outstream << getTabs(2) << (unsigned int) i << " " << 
+        getStringOpcode(att.attr.Code.code[i], cp) << endl;
+    }
+    outstream.unsetf(ios_base::adjustfield);
+
+    outstream << "Exception Table Length: " << att.attr.Code.exception_table_length << endl;
+
+    if(att.attr.Code.exception_table_length > 0) {
+        outstream << "\nTabela de excecoes: \n";
+        for(int it = 0; it < att.attr.Code.exception_table_length; it++) {
+            auto except = att.attr.Code.except_tb_array[it];
+            outstream << "Excecao" << "[" << it <<"] " << endl <<
+            getTabs(1) << "start_pc: " << except.start_pc << endl;
+            outstream << getTabs(1) << "end_pc: " << except.end_pc << endl;
+            outstream << getTabs(1) << "handler_pc: " << except.handler_pc << endl;
+            outstream << getTabs(1) << "catch_type: " << except.catch_type << endl; 
+        }
+        outstream << endl;
+    }
+
     outstream << "Attributes Count: " << att.attr.Code.attributes_count << endl;
 
     if(att.attr.Code.attributes_count > 0) {
@@ -303,27 +371,65 @@ void printConstValue(const attribute_info &att, const std::vector<cp_info> &cp, 
 
 void printExceptions(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream){
     outstream << "<Exceptions>\n";
-    outstream << "Number of Exeptions:  " << att.attr.Exceptions.number_of_exceptions << endl;
+    outstream << "Number of Exceptions:  " << att.attr.Exceptions.number_of_exceptions << endl;
 
+    if(att.attr.Exceptions.number_of_exceptions > 0) {
+        outstream << "Tabela de excecoes que podem ser lancadas:\n";
+        for(int it = 0; it < att.attr.Exceptions.number_of_exceptions; it++) {
+            outstream << "Tipo [" << it << "] : ";
+            outstream << constantToString(cp[att.attr.Exceptions.exception_index_table_array[it] - 1], cp, true) << endl;
+        }
+    }
     
-    // outstream << "Exception Index Table Array: " << att.attr.Exceptions.exception_table_length << endl;
 }
 
 void printSourceFile(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {    
     outstream << "<Source File>\n";
     outstream << "Source File Index: " << att.attr.SourceFile.sourcefile_index << endl;
+    outstream << "Nome do arquivo: " << 
+    constantToString(cp[att.attr.SourceFile.sourcefile_index -1], cp , true);
 }
 
 void printLocalVariableTable(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
     outstream << "<Local Variable Table>\n";
     outstream << "Local Variable Table Length: " << att.attr.LocalVariableTable.local_variable_table_length << endl;
+
+    if(att.attr.LocalVariableTable.local_variable_table_length > 0) {
+        outstream << "Tabela de Variaveis locais: \n";
+
+        for(int it = 0; it < att.attr.LocalVariableTable.local_variable_table_length; it++) {
+            auto temp = att.attr.LocalVariableTable.lv_tb_array[it];
+
+            outstream << "Number: " << it << endl;
+            outstream << "Start_pc: #" << temp.start_pc << endl;
+            outstream << "Length: " << temp.length << endl;
+            outstream << "Name index: #" << temp.name_index << " " << 
+            constantToString(cp[temp.name_index - 1], cp, true) << endl;
+            
+            outstream << "Descriptor index: #" << temp.descriptor_index << " " <<
+            constantToString(cp[temp.descriptor_index - 1], cp, true) << endl;
+            outstream << "Variable index: #" << temp.index << "\n\n"; 
+        }
+    }
     //outstream << "Local Variable table Array:  " << lv_tb_array << endl; 
 }
 
 void printLineNumberTable(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
     outstream << "<Line Number Table>\n";
     outstream << "Line Number Table Length: " << att.attr.LineNumberTable.line_number_table_length << endl;
-    //outstream << "Line Number table Array:  " << l_num_table_array << endl; //array
+    // outstream << "Line Number table Array:  " << l_num_table_array << endl; 
+
+    if(att.attr.LineNumberTable.line_number_table_length > 0){
+        outstream << "Tabela de Número de Linhas: \n";
+
+        for(int it = 0; it < att.attr.LineNumberTable.line_number_table_length; it++){
+            auto temp = att.attr.LineNumberTable.l_num_table_array[it];
+
+            outstream << "Number: " << it << endl;
+            outstream << "Start_pc: #" << temp.start_pc << endl;
+            outstream << "Line Number: #" << temp.line_number << "\n\n";
+        } 
+    }
 }
 
 void showAttr(const attribute_info &att, std::ostream &outstream, const std::vector<cp_info> &cp) {
@@ -352,21 +458,20 @@ void showAttr(const attribute_info &att, std::ostream &outstream, const std::vec
     //     outstream << endl;
     //     showExcept("Flw");
     // }
+    outstream << "\n\nInformacao Geral\n";
+    outstream << "\nIndice do nome do atributo: #" << att.att_name_idx << " <" <<
+    attr_name << ">\n";
+    outstream << "\nTamanho do atributo :" << att.att_length << endl;
 
     if(func_show_map.count(attr_name)) {
         func_show_map[attr_name](att, cp, outstream);
     }
-
-    else {
-        outstream << "Nome : " << attr_name << endl;
-    }
-
 }
 
 void showMethods(const ClassFile &cf, std::ostream &outstream) {
     
     if(cf.methods_count > 0) {
-        outstream << "--- Methods ---\n";
+        outstream << "\n\n--- Methods ---\n";
         
         for(int i = 0; i < cf.methods_count; i++) {
             std::string method_name = getUtf8Const(cf.constant_pool.at(cf.methods.at(i).name_index - 1));
@@ -375,7 +480,8 @@ void showMethods(const ClassFile &cf, std::ostream &outstream) {
             outstream << "[" << i << "] " << method_name << endl;
             outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
             outstream.setf(ios_base::showbase);
-            outstream << "Flags de acesso : "<< cf.methods[i].access_flags << endl;
+            outstream << "Flags de acesso : "<< cf.methods[i].access_flags << " " 
+            << getAccessFlagString(cf.methods[i].access_flags, METHOD_TYPE) << endl;
             outstream.unsetf(ios_base::basefield);
             outstream.unsetf(ios_base::showbase);
             
@@ -410,7 +516,8 @@ void showFields(const ClassFile &cf, std::ostream &outstream){
             outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
             outstream.setf(ios_base::right, ios_base::adjustfield);
             outstream.setf(ios_base::showbase);
-            outstream << "Flags de acesso : "<< cf.fields[i].access_flags << endl;
+            outstream << "Flags de acesso : "<< cf.fields[i].access_flags << " " << 
+            getAccessFlagString(cf.fields[i].access_flags, FIELD_TYPE) << endl;
             // Resetando as flags
             outstream.unsetf(ios_base::basefield);
             outstream.unsetf(ios_base::showbase);
@@ -435,9 +542,7 @@ void showFields(const ClassFile &cf, std::ostream &outstream){
 
 void showAttributes(const ClassFile &cf, std::ostream &outstream, const std::vector<cp_info> &cp) {
 
-    // outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
-    // outstream.setf(ios_base::showbase);
-    
+   
     if(cf.attributes_count > 0) {
         outstream << "\n\n--- Attributes ---\n\n";
 
@@ -448,7 +553,7 @@ void showAttributes(const ClassFile &cf, std::ostream &outstream, const std::vec
     }
     
 }// fizemo
-
+//vlw 
 void showClassFile(const ClassFile &myClassFile, std::ostream &outstream) {
     std::setlocale(LC_ALL, "");
 

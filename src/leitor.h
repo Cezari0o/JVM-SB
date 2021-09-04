@@ -27,7 +27,7 @@ using namespace std;
 #define Method_Type_info_value 16
 #define Inv_Dyn_info_value     18
 
-ClassFile readClassFile(const string &path);
+ClassFile readClassFile(const std::string &path);
 
 #endif
 

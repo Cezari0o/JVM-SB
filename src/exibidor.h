@@ -6,8 +6,14 @@
 #include <map>
 #include "leitor.h"
 #include "classes.h"
+#include "someTools.h"
 
 #define endl "\n"
+
+#define CLASS_FILE_TYPE 0
+#define FIELD_TYPE 1
+#define METHOD_TYPE 2
+
 
 typedef void printAttr(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream);
 
