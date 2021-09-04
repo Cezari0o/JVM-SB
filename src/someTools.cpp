@@ -20,6 +20,9 @@ u2 read2Byte(std::fstream &file){
     
     byte2 = read1Byte(file);
     byte2 = (byte2 << 8) | read1Byte(file);
+    
+    return byte2;
+
 }
 
 u4 read4Byte(std::fstream &file){

@@ -34,12 +34,13 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
 
             case Long_info_value:
                 cp[i].Const.Long_info.high_bytes = read4Byte(file);
-                cp[i++].Const.Long_info.low_bytes = read4Byte(file);
+                cp[i].Const.Long_info.low_bytes = read4Byte(file);
                 break;
 
             case Double_info_value:
                 cp[i].Const.Double_info.high_bytes = read4Byte(file);
-                cp[i++].Const.Double_info.low_bytes = read4Byte(file);
+                cp[i].Const.Double_info.low_bytes = read4Byte(file);
+
                 break;
 
             case String_info_value:
@@ -86,6 +87,10 @@ vector<cp_info> readConstantPool(fstream &file, u2 cp_count) {
                 break;
         }
         cp[i].tag = tag;
+
+        if(tag == Long_info_value or tag == Double_info_value)
+            i++;
+
     }
 
     return cp;
@@ -192,7 +197,7 @@ ClassFile readClassFile(const string &path){
     fstream file;
     ClassFile myClass;
 
-    file.open(path, fstream::in);
+    file.open(path, std::fstream::in | std::fstream::binary);
 
     if(!file.is_open()) {
         showExcept("Nao foi possivel abrir o arquivo");

@@ -13,14 +13,6 @@ int main() {
 
     ClassFile teste = readClassFile(caminho);
 
-    // if(teste.magic == 0xCAFEBABE)
-    //     cout << "0xCAFEBABE\n";
-
-    // cout << teste.magic << endl;
-    // cout << teste.minor_version << endl;
-    // cout << teste.major_version << endl;
-    // cout << teste.constant_pool_count << endl;
-
     showClassFile(teste, cout);    
 
     return 0; //sales = vendas

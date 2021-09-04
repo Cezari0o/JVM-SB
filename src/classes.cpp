@@ -10,7 +10,6 @@ std::string getUtf8Const(const cp_info &const_info)
         utf8_const.push_back(const_info.Const.Utf8.bytes[i]);
     }
 
-    utf8_const.push_back('\0');
 
     return utf8_const;
 
@@ -66,4 +65,57 @@ std::string getUtf8Const(const cp_info &const_info)
 bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp)
 {
     return idx >= 1 and idx < cp.size() + 1;
+}
+
+
+double getDoubleVal(const cp_info &const_info)
+{
+    
+    unsigned long long bits = ((unsigned long long)const_info.Const.Double_info.high_bytes << 32) | ((unsigned long long) const_info.Const.Double_info.low_bytes);
+
+    if(bits == 0x7ff0000000000000L)
+        return 0;// infinito positivo 
+
+    if(bits == 0xfff0000000000000L)
+        return 0;// infinito negativo 
+
+    if(bits >= 0x7ff0000000000001L and bits <= 0x7fffffffffffffffL or bits >= 0xfff0000000000001L and bits <= 0xffffffffffffffffL)
+        return 0; //NaN
+
+
+    int s = ((bits >> 63) == 0) ? 1 : -1;
+    int e = (int)((bits >> 52) & 0x7ffL);
+    long long m = (e == 0) ?
+    (bits & 0xfffffffffffffL) << 1 :
+    (bits & 0xfffffffffffffL) | 0x10000000000000L;
+
+    return s * m * pow(2, e - 1075);
+}
+
+
+long long getLongVal(const cp_info &const_info) {
+
+    return ((unsigned long long) const_info.Const.Long_info.high_bytes << 32) | ((unsigned long long) const_info.Const.Long_info.low_bytes);
+}
+
+float getFloatVal(const cp_info &const_info)
+{
+    unsigned int bits = const_info.Const.Float_info.bytes;
+
+    if(bits == 0x7f800000)
+        return 0;// infinito positivo 
+
+    if(bits == 0xff800000)
+        return 0;// infinito negativo 
+
+    if(bits >= 0x7f800001 and bits <= 0x7fffffff or bits >= 0xff800001 and bits <= 0xffffffff)
+        return 0; //NaN
+
+    int s = ((bits >> 31) == 0) ? 1 : -1;
+    int e = ((bits >> 23) & 0xff);
+    int m = (e == 0) ?
+    (bits & 0x7fffff) << 1 :
+    (bits & 0x7fffff) | 0x800000;
+
+    return s * m * pow(2, e - 150);
 }

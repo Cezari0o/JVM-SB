@@ -3,6 +3,7 @@
 
 #include "someTools.h"
 #include <vector>
+#include <cmath>
 
 // Estruturas auxiliares de atributos
 typedef struct {
@@ -136,8 +137,8 @@ typedef struct cp_info {
       }Long_info;                 //valor = 5
 
       struct{
-          u2 high_bytes;
-          u2 low_bytes;
+          u4 high_bytes;
+          u4 low_bytes;
       }Double_info;               //valor = 6
 
       struct{
@@ -191,5 +192,9 @@ class ClassFile {
 bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp);
 
 std::string getUtf8Const(const cp_info &const_info);
+double getDoubleVal(const cp_info &const_info);
+float getFloatVal(const cp_info &const_info);
+long long getLongVal(const cp_info &const_info);
+
 
 #endif
