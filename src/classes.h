@@ -1,3 +1,10 @@
+/**
+ * @file classes.h
+ * 
+ * @brief Contem as definicoes de classes e estruturas usadas para leitura de arquivos .class
+ * 
+ */
+
 #ifndef CLASSES_H_
 #define CLASSES_H_
 
@@ -6,6 +13,14 @@
 #include <cmath>
 
 // Estruturas auxiliares de atributos
+
+
+/**
+ * @struct exception_table
+ * @brief Define uma estrutura auxiliar para atributos
+ * @sa attribute_info
+ * @global
+ */
 typedef struct {
     u2 start_pc;
     u2 end_pc;
@@ -13,11 +28,23 @@ typedef struct {
     u2 catch_type;
 } exception_table;
 
+/**
+ * @struct line_number_table
+ * @brief Define uma estrutura auxiliar para atributos
+ * @sa attribute_info
+ * @global
+ */
 typedef struct {
     u2 start_pc;
     u2 line_number;
 } line_number_table;
 
+/**
+ * @struct local_variable_table
+ * @brief Define uma estrutura auxiliar para atributos
+ * @sa attribute_info
+ * @global
+ */
 typedef struct {
     u2 start_pc;
     u2 length;
@@ -26,6 +53,11 @@ typedef struct {
     u2 index;
 } local_variable_table;
 
+/**
+ * @struct attribute_info
+ * @brief Representa a estrutura de um atributo, de acordo a especificacao da documentacao da JVM 8
+ * @global
+ */
 typedef struct attribute_info {
     u2 att_name_idx;
     u4 att_length;
@@ -78,6 +110,11 @@ typedef struct attribute_info {
 
 } attribute_info;
 
+/**
+ * @struct field_info
+ * @brief Representa a estrutura de um field do arquivo .class, especificado de acordo com a documentacao da JVM 8
+ * @global
+ */
 typedef struct field_info {
     u2 access_flags;
     u2 name_index;
@@ -87,6 +124,11 @@ typedef struct field_info {
 
 } field_info;
     
+/**
+ * @struct method_info
+ * @brief Representa a estrutura de um metodo do arquivo .class, especificado de acordo com a documentacao da JVM 8
+ * @global
+ */
 typedef struct method_info {
     u2 access_flags;
     u2 name_index;
@@ -96,6 +138,12 @@ typedef struct method_info {
 } method_info;
 
 
+/**
+ * @struct cp_info
+ * @brief Contem a definicao das estruturas presentes no pool de constantes.
+ * @global
+ * 
+ */
 typedef struct cp_info {
     u1 tag;
 
@@ -169,6 +217,17 @@ typedef struct cp_info {
 } cp_info;
 
 
+/**
+ * @class ClassFile
+ * 
+ * @brief Armazena os dados contidos em um arquivo .class.
+ *
+ * @ 
+ * @author	Gabriel Cesário 
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ */
 class ClassFile {
     public:
       u4 magic;
@@ -189,12 +248,63 @@ class ClassFile {
       std::vector<attribute_info> attributes; 
 };
 
+/**
+ * @brief Verifica se o indice recebido é valido para no pool de constantes
+ *
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ * @param	idx   	O indice para o pool de constantes.	
+ * @param	cp      O pool de constantes, na forma de um vetor.
+ * @return	True se o acesso e valido, false caso contrario
+ */
 bool validConstPoolAccess(const u2 &idx, const std::vector<cp_info> &cp);
 
+/**
+ * @brief Funcao que retorna a string extraida da constante recebida.
+ *
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ * @param	const_info Contem a constante no formato UTF8 da struct cp_info.
+ * @warning A estrutura deve ser uma constante em UTF8.
+ * @return	Uma string extraida dos bytes da constante em utf8.
+ * @retval<string> A string eh uma instanciacao da string usada em c++.
+ * @sa http://www.cplusplus.com/reference/string/string/
+ */
 std::string getUtf8Const(const cp_info &const_info);
+/**
+ * @brief Retorna o valor double presente na constante recebida.
+ *
+ * 
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ * @param	const_info Contem o valor em IEE 754 representado o valor em ponto flutuante precisao dupla da constante.
+ * @return	O valor double da constante.
+ * @retval<double> O valor retornado foi montado da constante
+ */
 double getDoubleVal(const cp_info &const_info);
+/**
+ * @brief Monta o valor float presente na constante recebida.
+ *
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ * @param	const_info	Contem o valor em IEE 754 representado o valor em ponto flutuante da constante
+ * @return	Valor float da constante.
+ * @sa getDoubleVal
+ */
 float getFloatVal(const cp_info &const_info);
-long long getLongVal(const cp_info &const_info);
 
+/**
+ * @brief Retorna o valor long presente na constante
+ * 
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @param const_info Contem o valor long da constante recebida
+ * @return Valor long montado.
+ */
+long long getLongVal(const cp_info &const_info);
 
 #endif

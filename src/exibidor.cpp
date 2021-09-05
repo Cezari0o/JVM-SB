@@ -134,7 +134,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             }
 
             result += constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true);
-            //getUtf8Const(cp[cinfo.Const.String_info.string_index - 1]);
             break;
 
         case FieldRef_info_value:
@@ -148,11 +147,9 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             result += "\nName and Type: #";
             result += std::to_string(cinfo.Const.Fieldref_info.name_and_type_index) + " ";
             result += constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true);
-            //getUtf8Const(cp[cinfo.Const.Fieldref_info.class_index - 1]);
             break;
 
         case MethodRef_info_value:
-            // temp = cp[cinfo.Const.Methodref_info.class_index - 1].Const.Class_info.name_index - 1;
 
             if(not is_recursive) {
                 result += "<MethodRef_info>\n";// +
@@ -163,9 +160,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             result += "\nName and Type: #";
             result += std::to_string(cinfo.Const.Methodref_info.name_and_type_index) + " ";
             result += constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true);
-            //getUtf8Const(cp[temp]);
-            // "\nclass_index = " + to_string(cinfo.Const.Methodref_info.class_index);
-            // falta coisa aqui
             break;
 
         case Intface_Ref_info_value:
@@ -179,7 +173,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             result += "\nName and Type: #";
             result += std::to_string(cinfo.Const.InterfaceMethodref_info.name_and_type_index);
             result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true);
-            //getUtf8Const(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1]);
             break;
 
         case NameAType_info_value:
@@ -197,9 +190,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true); 
             }
             
-            // getUtf8Const(cp[cinfo.Const.NameAndType_info.name_index- 1])
-            // + "\nDescritor: " +
-            // getUtf8Const(cp[cinfo.Const.NameAndType_info.descriptor_index - 1]);
             break;
             
         case Method_Hand_info_value:
@@ -210,9 +200,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             result += "Reference kind: " + std::to_string(cinfo.Const.MethodHandle_info.reference_kind); // <- Arrumar
             result += "\nReference index: #" + std::to_string(cinfo.Const.MethodHandle_info.reference_index) + " ";
             result += constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
-            // getUtf8Const(cp[cinfo.Const.MethodHandle_info.reference_index - 1])
-            // + "\nTipo: " +
-            // getUtf8Const(cp[cinfo.Const.MethodHandle_info.reference_kind - 1]);
             break;
             
         case Method_Type_info_value:
@@ -249,7 +236,6 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
 
 void showConstantPool(const ClassFile &cf, std::ostream &outstream) {
     int counter = 0;
-    // std::string someTabs = getTabs(1);
     bool jump_next = false;
 
     outstream << "-- Dados da tabela de constant pool --\n";
@@ -411,13 +397,11 @@ void printLocalVariableTable(const attribute_info &att, const std::vector<cp_inf
             outstream << "Variable index: #" << temp.index << "\n\n"; 
         }
     }
-    //outstream << "Local Variable table Array:  " << lv_tb_array << endl; 
 }
 
 void printLineNumberTable(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
     outstream << "<Line Number Table>\n";
     outstream << "Line Number Table Length: " << att.attr.LineNumberTable.line_number_table_length << endl;
-    // outstream << "Line Number table Array:  " << l_num_table_array << endl; 
 
     if(att.attr.LineNumberTable.line_number_table_length > 0){
         outstream << "Tabela de Número de Linhas: \n";
@@ -433,31 +417,9 @@ void printLineNumberTable(const attribute_info &att, const std::vector<cp_info> 
 }
 
 void showAttr(const attribute_info &att, std::ostream &outstream, const std::vector<cp_info> &cp) {
-
-    // if(!validConstPoolAccess(att->att_name_idx, cp)) {
-    //     std::string msg = "[Atributos] Indice de acesso invalido para o pool de constantes\n";
-    //     msg += "idx acessado = " + std::to_string((unsigned int) att->att_name_idx);
-    //     showExcept(msg);
-    // }
     
     std::string attr_name = getUtf8Const(cp.at(att.att_name_idx - 1));
 
-    // if("Code" != attr_name) {
-    //     std::string alo = "Code";
-    //     outstream << attr_name << " <-atributo" << endl;
-    //     outstream << attr_name.size() << endl;
-    //     outstream << "Ta errado kkkkkk se fudeu " << endl;
-
-    //     for(int i = 0; i < attr_name.size(); i++) {
-    //         outstream << (int) attr_name[i] << " ";
-    //     }
-    //     outstream << endl;
-    //     for(int i = 0; i < alo.size(); i++) {
-    //         outstream << (int) alo[i] << " ";
-    //     }
-    //     outstream << endl;
-    //     showExcept("Flw");
-    // }
     outstream << "\n\nInformacao Geral\n";
     outstream << "\nIndice do nome do atributo: #" << att.att_name_idx << " <" <<
     attr_name << ">\n";
@@ -499,8 +461,6 @@ void showMethods(const ClassFile &cf, std::ostream &outstream) {
             }
         }
     }
-
-    // Resetando as flags
 
 }
 

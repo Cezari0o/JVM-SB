@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * 
+ * @brief Le o arquivo e passa para as demais funcoes.
+ */
 #include <iostream>
 #include <string>
 #include "leitor.h"

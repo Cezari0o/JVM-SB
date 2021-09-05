@@ -1,3 +1,9 @@
+/**
+ * @file leitor.h
+ * 
+ * @brief Contem a funcao de leitura de arquivos .class
+ * 
+ */
 #ifndef LEITOR_H_
 #define LEITOR_H_
 
@@ -12,6 +18,7 @@
 
 using namespace std;
 
+// Defines para uso no pool de constantes
 #define Utf8_info_value        1
 #define Int_info_value         3
 #define Float_info_value       4
@@ -27,6 +34,16 @@ using namespace std;
 #define Method_Type_info_value 16
 #define Inv_Dyn_info_value     18
 
+/**
+ * Recebe um caminho para o arquivo .class a ser lido, e retorna um Classfile se leu corretamente.
+ *
+ * @since	v0.0.1
+ * @version	v1.0.0	Sunday, September 5th, 2021.
+ * @global
+ * @param	path O caminho para o arquivo a ser lido
+ * @return	O Classfile lido.
+ * @sa      ClassFile
+ */
 ClassFile readClassFile(const std::string &path);
 
 #endif
