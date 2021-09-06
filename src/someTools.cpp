@@ -56,6 +56,19 @@ void showExcept(const std::string &msg) {
     exit(EXIT_FAILURE);
 }
 
+void showHelp(std::ostream &output) {
+
+    output << "-- Implementacao da JVM para o trabalho de Software Basico -- \n\n";
+    output << "(Ate o momento, apenas o leitor e o exibidor foram implementados)\n";
+    output << "Le os dados de um arquivo class e mostra no terminal o que foi lido.\n\n";
+    output << "Digite o nome do arquivo class que deve ser utilizado\n";
+    output << "Por exemplo, para um arquivo \"teste.class\", use da seguinte forma:\n";
+    output << "JVM_SB teste.class\n\n";
+    output << "-h : mostra a ajuda na tela e sai\n\n";
+    output << "--help : mostra a ajuda na tela e sai\n\n";
+}
+
+
 std::vector<std::pair<u2, std::string>> init_opcode_list() {
 
     return {

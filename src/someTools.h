@@ -85,5 +85,7 @@ std::vector<std::pair<u2, std::string>> init_opcode_list();
  */
 void showExcept(const std::string &msg);
 
+void showHelp(std::ostream &output);
+
 
 #endif
