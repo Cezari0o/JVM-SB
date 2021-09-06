@@ -30,7 +30,7 @@ int main(int arg_count, char* argument_vector[]) {
     // std::cout << "Digite o caminho do arquivo: ";
     // std::cin >> caminho;
 
-    caminho = argument_vector[1];
+    caminho = arg;
     ClassFile teste = readClassFile(caminho);
 
     showClassFile(teste, cout);    
