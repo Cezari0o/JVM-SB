@@ -55,11 +55,11 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             if(not is_recursive) {
                 result += "<Integer_info>\n";
 
-                result += "Bytes: " + std::to_string(cinfo.Const.Integer_info.bytes); // <- Arrumar
+                result += "Bytes: " + std::to_string(cinfo.Const.Integer_info.bytes) + "\n"; // <- Arrumar
                 result += "Integer : ";
             }
 
-            result += std::to_string((int) cinfo.Const.Integer_info.bytes);
+            result += getTabs(is_recursive) + std::to_string((int) cinfo.Const.Integer_info.bytes);
             break;
 
         case Float_info_value:
@@ -69,7 +69,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += "Float: ";
             }
 
-            result += std::to_string(getFloatVal(cinfo)); // <- Arrumar
+            result += getTabs(is_recursive) + std::to_string(getFloatVal(cinfo)); // <- Arrumar
             break;
 
         case Long_info_value:
@@ -82,7 +82,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += std::to_string((int) cinfo.Const.Long_info.low_bytes) + "\n"; // <- Arrumar
             }
 
-            result += std::to_string(getLongVal(cinfo));
+            result += getTabs(is_recursive) + std::to_string(getLongVal(cinfo));
             break;
 
         case Double_info_value:
@@ -95,7 +95,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += std::to_string((int) cinfo.Const.Double_info.low_bytes) + "\n"; // <- Arrumar
             }
             
-            result += std::to_string(getDoubleVal(cinfo));
+            result += getTabs(is_recursive) + std::to_string(getDoubleVal(cinfo));
             break;
 
         case Class_info_value:
@@ -106,7 +106,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += std::to_string(cinfo.Const.Class_info.name_index) + " ";
             }
 
-            result += constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true);
+            result += getTabs(is_recursive) + constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true);
             break;
 
         case String_info_value:
@@ -117,7 +117,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += std::to_string(cinfo.Const.String_info.string_index) + " ";
             }
 
-            result += constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true);
+            result += getTabs(is_recursive) + constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true);
             break;
 
         case FieldRef_info_value:
@@ -128,7 +128,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
 
             result += "Nome da Classe: #" + std::to_string(cinfo.Const.Fieldref_info.class_index) + " ";
             result += constantToString(cp[cinfo.Const.Fieldref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
+            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
             result += std::to_string(cinfo.Const.Fieldref_info.name_and_type_index) + " ";
             result += constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true);
             break;
@@ -141,7 +141,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
 
             result += "Nome da Classe: #" + std::to_string(cinfo.Const.Methodref_info.class_index) + " ";
             result += constantToString(cp[cinfo.Const.Methodref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
+            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
             result += std::to_string(cinfo.Const.Methodref_info.name_and_type_index) + " ";
             result += constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true);
             break;
@@ -154,8 +154,8 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
 
             result += "Nome da Classe: #" + std::to_string(cinfo.Const.InterfaceMethodref_info.class_index) + " ";
             result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
-            result += std::to_string(cinfo.Const.InterfaceMethodref_info.name_and_type_index);
+            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
+            result += std::to_string(cinfo.Const.InterfaceMethodref_info.name_and_type_index) + " ";
             result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true);
             break;
 
@@ -165,7 +165,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += "<NameAndType_info>\n"; // +
                 result += "Name: #" + std::to_string(cinfo.Const.NameAndType_info.name_index) + " "; 
                 result += constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true);
-                result += "\nDescriptor: #" + std::to_string(cinfo.Const.NameAndType_info.descriptor_index) + " "; 
+                result += "\n " + getTabs(is_recursive) +  " Descriptor: #" + std::to_string(cinfo.Const.NameAndType_info.descriptor_index) + " "; 
                 result += constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true);
             }
             
@@ -182,7 +182,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += "<Method Handle>\n";
             }
             result += "Reference kind: " + std::to_string(cinfo.Const.MethodHandle_info.reference_kind); // <- Arrumar
-            result += "\nReference index: #" + std::to_string(cinfo.Const.MethodHandle_info.reference_index) + " ";
+            result += "\n" + getTabs(is_recursive) + "Reference index: #" + std::to_string(cinfo.Const.MethodHandle_info.reference_index) + " ";
             result += constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
             break;
             
@@ -193,7 +193,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
                 result += "Descriptor index: # " + std::to_string(cinfo.Const.MethodType_info.descriptor_index) + " ";
             }
 
-            result += getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
+            result += getTabs(is_recursive) + getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
             break;
             
         case Inv_Dyn_info_value:
@@ -204,7 +204,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
 
             result += "Bootstrap Method Attribute Index: " + 
             std::to_string(cinfo.Const.InvokeDynamic_info.bootstrap_method_attr_index) + "\n";
-            result += "Name and type: #" +
+            result += getTabs(is_recursive) + "Name and type: #" +
             std::to_string(cinfo.Const.InvokeDynamic_info.name_and_type_index) + " " +
             constantToString(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1], cp, true);
 
