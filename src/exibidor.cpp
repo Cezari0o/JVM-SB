@@ -1,237 +1,22 @@
 #include "exibidor.h"
 
+const ClassFile* classFileRef;
+
 void showAttr(const attribute_info &att, std::ostream &outstream, const std::vector<cp_info> &cp);
 
-std::string getTabs(int count) {
-    std::string tabs = "";
 
-    if(count == 0)
-        return "";
+std::string getToShowAccessFlagsStrings(u2 flags, int type) {
+    std::stringstream buffer_str;
 
-    if(count == 1)
-        return "\t";
-
-    if(count % 2 == 1)
-        tabs = getTabs(count / 2) + getTabs(count / 2) + "\t";
-    else
-        tabs = getTabs(count / 2) + getTabs(count / 2);
-
-    return tabs;
-}
-
-std::string getAccessFlagString(u2 flags, int type) {
-
-    // type -> class_file = 0, fields = 1, method = 2, 
-
-    std::vector<std::pair<u2, std::vector<std::string>>> stringMask = {
-        {0x0001,  {"ACC_PUBLIC", "ACC_PUBLIC", "ACC_PUBLIC"}},
-        {0x0002,  {"ACC_PRIVATE", "ACC_PRIVATE", "ACC_PRIVATE"}},
-        {0x0004,  {"ACC_PROTECTED", "ACC_PROTECTED", "ACC_PROTECTED"}},
-        {0x0008,  {"ACC_STATIC", "ACC_STATIC", "ACC_STATIC"}},
-        {0x0010,  {"ACC_FINAL", "ACC_FINAL", "ACC_FINAL"}},
-        {0x0020,  {"ACC_SUPER", "", "ACC_SYNCHRONIZED"}},
-        {0x0040,  {"ACC_BRIDGE", "ACC_VOLATILE", "ACC_BRIDGE"}},
-        {0x0080,  {"ACC_VARARGS", "ACC_TRANSIENT", "ACC_VARARGS"}},
-        {0x0100,  {"ACC_NATIVE", ""," ACC_NATIVE"}},
-        {0x0200,  {"ACC_INTERFACE", "",""}},
-        {0x0400,  {"ACC_ABSTRACT", "", "ACC_ABSTRACT"}},
-        {0x0800,  {"ACC_STRICT", "", "ACC_STRICT"}},
-        {0x1000,  {"ACC_SYNTHETIC", "ACC_SYNTHETIC", "ACC_SYNTHETIC"}},
-        {0x2000,  {"ACC_ANNOTATION", "", ""}},
-        {0x4000,  {"ACC_ENUM", "ACC_ENUM", ""}}
-    };
-
-
-    for(auto &it : stringMask) {
-        if(flags == it.first) {
-            return it.second[type];
-        }
+    std::vector<std::string> flags_acesso = getAccessFlagString(flags, type);
+    buffer_str << " ["; 
+    for(int i = 0; i < flags_acesso.size(); i++) {
+        auto f = flags_acesso[i];
+        buffer_str << f << (i == flags_acesso.size() - 1? "" : ", ");
     }
-
-    return "ACC_FLAG_PUBLIC";
-}
-
-std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bool is_recursive) {
-    std::string result = "";
-    int temp;
-
-    switch (cinfo.tag){
-        case Utf8_info_value:
-
-            if(not is_recursive) {
-                result += "<Utf8_info>\n";
-            }
-
-            result += getUtf8Const(cinfo);
-            break;
-        
-        case Int_info_value:
-            result += "<Integer> \nvalor: " + to_string((int) cinfo.Const.Integer_info.bytes);
-            
-            if(not is_recursive) {
-                result += "<Integer_info>\n";
-
-                result += "Bytes: " + std::to_string(cinfo.Const.Integer_info.bytes); // <- Arrumar
-                result += "Integer : ";
-            }
-
-            result += std::to_string((int) cinfo.Const.Integer_info.bytes);
-            break;
-
-        case Float_info_value:
-            if(not is_recursive) {
-                result += "<Float_info>\n";
-                result += "Byte: " + std::to_string(cinfo.Const.Float_info.bytes) + "\n"; // <- Arrumar
-                result += "Float: ";
-            }
-
-            result += std::to_string(getFloatVal(cinfo)); // <- Arrumar
-            break;
-
-        case Long_info_value:
-
-            if(not is_recursive) {
-                result = "<Long_info>\n";
-                result += "High bytes: ";
-                result += std::to_string((int) cinfo.Const.Long_info.high_bytes) + "\n"; // <- Arrumar
-                result += "Low bytes: ";
-                result += std::to_string((int) cinfo.Const.Long_info.low_bytes) + "\n"; // <- Arrumar
-            }
-
-            result += std::to_string(getLongVal(cinfo));
-            break;
-
-        case Double_info_value:
-            
-            if(not is_recursive){
-                result += "<Double_info>\n";
-                result += "High bytes: ";
-                result += std::to_string((int) cinfo.Const.Double_info.high_bytes) + "\n"; // <- Arrumar
-                result += "Low bytes: ";
-                result += std::to_string((int) cinfo.Const.Double_info.low_bytes) + "\n"; // <- Arrumar
-            }
-            
-            result += std::to_string(getDoubleVal(cinfo));
-            break;
-
-        case Class_info_value:
-
-            if(not is_recursive) {
-                result = "<Class_info>\n\n";
-                result += "Nome da classe: #";
-                result += std::to_string(cinfo.Const.Class_info.name_index) + " ";
-            }
-
-            result += constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true);
-            break;
-
-        case String_info_value:
-
-            if(not is_recursive) {
-                result += "<String>\n";// +    
-                result += "String: #";
-                result += std::to_string(cinfo.Const.String_info.string_index) + " ";
-            }
-
-            result += constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true);
-            break;
-
-        case FieldRef_info_value:
-
-            if(not is_recursive) {
-                result += "<FieldRef_info>\n";// +
-            }
-
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.Fieldref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.Fieldref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
-            result += std::to_string(cinfo.Const.Fieldref_info.name_and_type_index) + " ";
-            result += constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true);
-            break;
-
-        case MethodRef_info_value:
-
-            if(not is_recursive) {
-                result += "<MethodRef_info>\n";// +
-            }
-
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.Methodref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.Methodref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
-            result += std::to_string(cinfo.Const.Methodref_info.name_and_type_index) + " ";
-            result += constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true);
-            break;
-
-        case Intface_Ref_info_value:
-            
-            if(not is_recursive) {
-                result += "<InterfaceMethodRef_info>\n";// +
-            }
-
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.InterfaceMethodref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1], cp, true);
-            result += "\nName and Type: #";
-            result += std::to_string(cinfo.Const.InterfaceMethodref_info.name_and_type_index);
-            result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true);
-            break;
-
-        case NameAType_info_value:
-
-            if(not is_recursive) {
-                result += "<NameAndType_info>\n"; // +
-                result += "Name: #" + std::to_string(cinfo.Const.NameAndType_info.name_index) + " "; 
-                result += constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true);
-                result += "\nDescriptor: #" + std::to_string(cinfo.Const.NameAndType_info.descriptor_index) + " "; 
-                result += constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true);
-            }
-            
-            else {
-                result += constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true) + ": " +
-                constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true); 
-            }
-            
-            break;
-            
-        case Method_Hand_info_value:
-
-            if(not is_recursive) {
-                result += "<Method Handle>\n";
-            }
-            result += "Reference kind: " + std::to_string(cinfo.Const.MethodHandle_info.reference_kind); // <- Arrumar
-            result += "\nReference index: #" + std::to_string(cinfo.Const.MethodHandle_info.reference_index) + " ";
-            result += constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
-            break;
-            
-        case Method_Type_info_value:
-
-            if(not is_recursive) {
-                result += "<MethodType_info>\n";
-                result += "Descriptor index: # " + std::to_string(cinfo.Const.MethodType_info.descriptor_index) + " ";
-            }
-
-            result += getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
-            break;
-            
-        case Inv_Dyn_info_value:
-
-            if(not is_recursive) {
-                result += "<Invoke Dynamic> \n";
-            }
-
-            result += "Bootstrap Method Attribute Index: " + 
-            std::to_string(cinfo.Const.InvokeDynamic_info.bootstrap_method_attr_index) + "\n";
-            result += "Name and type: #" +
-            std::to_string(cinfo.Const.InvokeDynamic_info.name_and_type_index) + " " +
-            constantToString(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1], cp, true);
-
-            break;
-            
-        default:
-            showExcept(" Constante invalida!\nTag: " + to_string(cinfo.tag));
-            break;
-    }
-
-    return result;
+    buffer_str << "]\n";
+    
+    return buffer_str.str();
 }
 
 void showConstantPool(const ClassFile &cf, std::ostream &outstream) {
@@ -263,15 +48,24 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
     outstream.setf(ios_base::hex, ios_base::basefield);
     outstream.setf(ios_base::showbase);
 
+    outstream.setf(std::ios_base::uppercase);
     outstream << "Magic number: " << cf.magic << endl;
-    outstream << "Flags de acesso: " << cf.access_flags << " " << getAccessFlagString(cf.access_flags, CLASS_FILE_TYPE) << endl;
+    outstream << "Flags de acesso: " << cf.access_flags << getToShowAccessFlagsStrings(cf.access_flags, CLASS_FILE_TYPE) << endl;
+    outstream.unsetf(std::ios_base::uppercase);
 
     // Resetando as flags
     outstream.unsetf(ios_base::basefield);
     outstream.unsetf(ios_base::showbase);
+    outstream.setf(std::ios::fixed);
+    auto prec = outstream.precision();
+    outstream.precision(0);
 
+    int major_v = cf.major_version - 44;
+    string major_v_str = getMajorVersionString(cf.major_version);
     outstream << "Minor version: " << cf.minor_version << endl;
-    outstream << "Major version: " << cf.major_version << endl;
+    outstream << "Major version: " << cf.major_version << " [" << 
+    (major_v < 10? "1." + major_v_str : major_v_str) << "]" << endl;
+    outstream.precision(prec);
     outstream << "Constant pool count: " << cf.constant_pool_count << endl;    
     outstream << "Classe do arquivo: cp_info #" << cf.this_class << " <" << 
     constantToString(cf.constant_pool[cf.this_class - 1], cf.constant_pool, true) << ">\n";
@@ -296,30 +90,27 @@ void showInterfaces(const ClassFile &cf, std::ostream &outstream){
 
 }
 
-std::string getStringOpcode(const u1 &opcode, const std::vector<cp_info> &cp) {
-    std::vector<std::pair<u2, std::string>> mnemonicos = init_opcode_list();
-
-    for(int i = 0; i < mnemonicos.size(); i++) {
-        if(mnemonicos.at(i).first == opcode) {
-            return mnemonicos.at(i).second;
-        }
-    }
-
-    return "Null";
-}
-
 void printCode(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
     
     outstream << "<Code>\n\n";
-    outstream << "Max Stacks:  " << att.attr.Code.max_stack << endl; // (ㆆ_ㆆ)
-    outstream << "Max Local:   " << att.attr.Code.max_locals << endl; // (ง︡'-'︠)ง
-    outstream << "Code Length: " << att.attr.Code.code_length << endl; // ╍●‿●╍
+    outstream << "Max Stacks:  " << att.attr.Code.max_stack << endl; // 
+    outstream << "Max Local:   " << att.attr.Code.max_locals << endl; // 
+    outstream << "Code Length: " << att.attr.Code.code_length << endl; // 
     outstream << "Bytecode:    " << endl;
 
     outstream.setf(ios_base::internal, ios_base::adjustfield);
-    for(int i = 0; i < att.attr.Code.code_length; i++) {
-        outstream << getTabs(2) << (unsigned int) i << " " << 
-        getStringOpcode(att.attr.Code.code[i], cp) << endl;
+    int bytes_len = 0;
+    for(int i = 0; i < att.attr.Code.code_length; i += bytes_len) {
+        // outstream << getTabs(2) << (unsigned int) i << " " << 
+        // getStringOpcode(att.attr.Code.code[i], cp) << endl;
+
+        auto temp = getInstructToPrint(att.attr.Code.code[i],
+            i, att.attr.Code.code, *classFileRef, 2
+            /* opcde, vetor de bytecode, constant_pool, classfile*/);
+        bytes_len = temp.first;
+
+        outstream << getTabs(2) << (unsigned int) i << " " << temp.second << endl;
+
     }
     outstream.unsetf(ios_base::adjustfield);
 
@@ -443,7 +234,7 @@ void showMethods(const ClassFile &cf, std::ostream &outstream) {
             outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
             outstream.setf(ios_base::showbase);
             outstream << "Flags de acesso : "<< cf.methods[i].access_flags << " " 
-            << getAccessFlagString(cf.methods[i].access_flags, METHOD_TYPE) << endl;
+            << getToShowAccessFlagsStrings(cf.methods[i].access_flags, METHOD_TYPE) << endl;
             outstream.unsetf(ios_base::basefield);
             outstream.unsetf(ios_base::showbase);
             
@@ -476,8 +267,8 @@ void showFields(const ClassFile &cf, std::ostream &outstream){
             outstream.setf(ios_base::hex, ios_base::basefield); // <- Pra printar em hexa as flags
             outstream.setf(ios_base::right, ios_base::adjustfield);
             outstream.setf(ios_base::showbase);
-            outstream << "Flags de acesso : "<< cf.fields[i].access_flags << " " << 
-            getAccessFlagString(cf.fields[i].access_flags, FIELD_TYPE) << endl;
+            outstream << "Flags de acesso : "<< cf.fields[i].access_flags <<
+            getToShowAccessFlagsStrings(cf.fields[i].access_flags, FIELD_TYPE) << endl;
             // Resetando as flags
             outstream.unsetf(ios_base::basefield);
             outstream.unsetf(ios_base::showbase);
@@ -512,11 +303,14 @@ void showAttributes(const ClassFile &cf, std::ostream &outstream, const std::vec
         }
     }
     
-}// fizemo
-//vlw 
+}
+
 void showClassFile(const ClassFile &myClassFile, std::ostream &outstream) {
     std::setlocale(LC_ALL, "");
+    outstream.setf(std::ios::fixed);
+    outstream.precision(6);
 
+    classFileRef = &myClassFile;
     outstream << "\n--- Exibindo os dados lidos do arquivo class ---\n\n";
     showGeneralInformation(myClassFile, outstream);
     outstream << endl;

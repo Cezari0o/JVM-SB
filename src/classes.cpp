@@ -74,13 +74,13 @@ double getDoubleVal(const cp_info &const_info)
     unsigned long long bits = ((unsigned long long)const_info.Const.Double_info.high_bytes << 32) | ((unsigned long long) const_info.Const.Double_info.low_bytes);
 
     if(bits == 0x7ff0000000000000L)
-        return 0;// infinito positivo 
+        return INFINITY;// infinito positivo 
 
     if(bits == 0xfff0000000000000L)
-        return 0;// infinito negativo 
+        return - INFINITY;// infinito negativo 
 
     if(bits >= 0x7ff0000000000001L and bits <= 0x7fffffffffffffffL or bits >= 0xfff0000000000001L and bits <= 0xffffffffffffffffL)
-        return 0; //NaN
+        return nan(""); //NaN
 
 
     int s = ((bits >> 63) == 0) ? 1 : -1;
@@ -103,13 +103,13 @@ float getFloatVal(const cp_info &const_info)
     unsigned int bits = const_info.Const.Float_info.bytes;
 
     if(bits == 0x7f800000)
-        return 0;// infinito positivo 
+        return INFINITY;// infinito positivo 
 
     if(bits == 0xff800000)
-        return 0;// infinito negativo 
+        return -INFINITY;// infinito negativo 
 
     if(bits >= 0x7f800001 and bits <= 0x7fffffff or bits >= 0xff800001 and bits <= 0xffffffff)
-        return 0; //NaN
+        return nanf(""); //NaN
 
     int s = ((bits >> 31) == 0) ? 1 : -1;
     int e = ((bits >> 23) & 0xff);

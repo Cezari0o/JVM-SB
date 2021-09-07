@@ -14,12 +14,10 @@
 #include "leitor.h"
 #include "classes.h"
 #include "someTools.h"
+#include "str_func.h"
 
 #define endl "\n"
 
-#define CLASS_FILE_TYPE 0
-#define FIELD_TYPE 1
-#define METHOD_TYPE 2
 /**
  * @typedef printAttr
  * @global
