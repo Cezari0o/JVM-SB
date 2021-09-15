@@ -32,7 +32,13 @@ void showConstantPool(const ClassFile &cf, std::ostream &outstream) {
             continue;
         }
         else {
-            outstream << "[" << ++counter <<  "] " << constantToString(it, cf.constant_pool, false) << "\n\n";
+            outstream << "[" << ++counter <<  "] ";
+            std::vector<std::string> constString =  constantToString(it, cf.constant_pool, false);
+
+            for(std::string line : constString)
+                outstream << line << endl;
+            outstream << endl;
+
             if(it.tag == Long_info_value or it.tag == Double_info_value) {
                 jump_next = true;
             }
@@ -68,9 +74,9 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
     outstream.precision(prec);
     outstream << "Constant pool count: " << cf.constant_pool_count << endl;    
     outstream << "Classe do arquivo: cp_info #" << cf.this_class << " <" << 
-    constantToString(cf.constant_pool[cf.this_class - 1], cf.constant_pool, true) << ">\n";
+    constantToString(cf.constant_pool[cf.this_class - 1], cf.constant_pool).front() << ">\n";
     outstream << "Super classe : cp_info #" << cf.super_class << " <" << 
-    constantToString(cf.constant_pool[cf.super_class - 1], cf.constant_pool, true) << ">\n";
+    constantToString(cf.constant_pool[cf.super_class - 1], cf.constant_pool).front() << ">\n";
     outstream << "Quant. de Interfaces : " << cf.interfaces_count << endl;
     outstream << "Quant. de Fields : " << cf.fields_count << endl;
     outstream << "Quant. de Metodos : " << cf.methods_count << endl;
@@ -83,7 +89,7 @@ void showInterfaces(const ClassFile &cf, std::ostream &outstream){
         for(u2 i =0; i<cf.interfaces_count;i++){
             outstream << "[" << i << "] cp_info#" << cf.interfaces[i] << endl;
             outstream << "Super interface: " << 
-            constantToString(cf.constant_pool.at(cf.interfaces[i] - 1), cf.constant_pool, true) << "\n\n";
+            constantToString(cf.constant_pool.at(cf.interfaces[i] - 1), cf.constant_pool, true).front() << "\n\n";
         }
     }
     outstream << endl;
@@ -143,7 +149,8 @@ void printCode(const attribute_info &att, const std::vector<cp_info> &cp, std::o
 
 void printConstValue(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream){
     outstream << "<Constant Attribute>\n";
-    outstream << constantToString(cp[att.attr.ConstValue.constValue_index - 1], cp, false) << endl;
+    outstream << "Valor: " << 
+    constantToString(cp[att.attr.ConstValue.constValue_index - 1], cp).front() << endl;
 }
 
 void printExceptions(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream){
@@ -154,7 +161,7 @@ void printExceptions(const attribute_info &att, const std::vector<cp_info> &cp, 
         outstream << "Tabela de excecoes que podem ser lancadas:\n";
         for(int it = 0; it < att.attr.Exceptions.number_of_exceptions; it++) {
             outstream << "Tipo [" << it << "] : ";
-            outstream << constantToString(cp[att.attr.Exceptions.exception_index_table_array[it] - 1], cp, true) << endl;
+            outstream << constantToString(cp[att.attr.Exceptions.exception_index_table_array[it] - 1], cp, true).front() << endl;
         }
     }
     
@@ -164,7 +171,7 @@ void printSourceFile(const attribute_info &att, const std::vector<cp_info> &cp, 
     outstream << "<Source File>\n";
     outstream << "Source File Index: " << att.attr.SourceFile.sourcefile_index << endl;
     outstream << "Nome do arquivo: " << 
-    constantToString(cp[att.attr.SourceFile.sourcefile_index -1], cp , true);
+    constantToString(cp[att.attr.SourceFile.sourcefile_index -1], cp , true).front() << endl;
 }
 
 void printLocalVariableTable(const attribute_info &att, const std::vector<cp_info> &cp, std::ostream &outstream) {
@@ -181,10 +188,10 @@ void printLocalVariableTable(const attribute_info &att, const std::vector<cp_inf
             outstream << "Start_pc: #" << temp.start_pc << endl;
             outstream << "Length: " << temp.length << endl;
             outstream << "Name index: #" << temp.name_index << " " << 
-            constantToString(cp[temp.name_index - 1], cp, true) << endl;
+            constantToString(cp[temp.name_index - 1], cp, true).front() << endl;
             
             outstream << "Descriptor index: #" << temp.descriptor_index << " " <<
-            constantToString(cp[temp.descriptor_index - 1], cp, true) << endl;
+            constantToString(cp[temp.descriptor_index - 1], cp, true).front() << endl;
             outstream << "Variable index: #" << temp.index << "\n\n"; 
         }
     }

@@ -36,177 +36,345 @@ std::string getStringOpcode(const u1 &opcode, const std::vector<cp_info> &cp) {
     return "nop";
 }
 
-std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bool is_recursive) {
-    std::string result = "";
-    int temp;
+// to querendo fazer retornar um vetor de string nessa funcao
+std::vector<std::string> constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bool summarize) {
+    // std::string result = "";
+    std::stringstream temp;
+    std::vector<string> buffer;
 
     switch (cinfo.tag){
         case Utf8_info_value:
 
-            if(not is_recursive) {
-                result += "<Utf8_info>\n";
+            if(not summarize) {
+                buffer.push_back("<Utf8_info>");
             }
 
-            result += getUtf8Const(cinfo);
+            buffer.push_back(getUtf8Const(cinfo));
             break;
         
         case Int_info_value:
             
-            if(not is_recursive) {
-                result += "<Integer_info>\n";
+            if(not summarize) {
+                buffer.push_back("<Integer_info>");
 
-                result += "Bytes: " + std::to_string(cinfo.Const.Integer_info.bytes) + "\n"; // <- Arrumar
-                result += "Integer : ";
+                temp.setf(std::ios::hex, std::ios::basefield);
+                temp.setf(std::ios::showbase);
+                temp << "Bytes: " << cinfo.Const.Integer_info.bytes;
+                temp.unsetf(std::ios::showbase);
+                temp.unsetf(std::ios::basefield);
+
+                buffer.push_back(temp.str());
+                buffer.push_back("Integer : " + std::to_string((int) cinfo.Const.Integer_info.bytes));
             }
 
-            result += getTabs(is_recursive) + std::to_string((int) cinfo.Const.Integer_info.bytes);
+            else {
+                buffer.push_back(std::to_string((int) cinfo.Const.Integer_info.bytes));
+            }
             break;
 
         case Float_info_value:
-            if(not is_recursive) {
-                result += "<Float_info>\n";
-                result += "Byte: " + std::to_string(cinfo.Const.Float_info.bytes) + "\n"; // <- Arrumar
-                result += "Float: ";
+            if(not summarize) {
+                buffer.push_back("<Float_info>");
+
+                temp.setf(std::ios::hex, std::ios::basefield);
+                temp.setf(std::ios::showbase);
+                temp << "Bytes: " << (cinfo.Const.Float_info.bytes);
+                temp.unsetf(std::ios::showbase);
+                temp.unsetf(std::ios::basefield);
+
+                buffer.push_back(temp.str());
+                buffer.push_back("Float: " + std::to_string(getFloatVal(cinfo)));
             }
 
-            result += getTabs(is_recursive) + std::to_string(getFloatVal(cinfo)); // <- Arrumar
+            else {
+                buffer.push_back(std::to_string(getFloatVal(cinfo)));
+            }
+
             break;
 
         case Long_info_value:
 
-            if(not is_recursive) {
-                result = "<Long_info>\n";
-                result += "High bytes: ";
-                result += std::to_string((int) cinfo.Const.Long_info.high_bytes) + "\n"; // <- Arrumar
-                result += "Low bytes: ";
-                result += std::to_string((int) cinfo.Const.Long_info.low_bytes) + "\n"; // <- Arrumar
+            if(not summarize) {
+                buffer.push_back( "<Long_info>" );
+
+                temp.setf(std::ios::hex, std::ios::basefield); // <- Setando flags
+                temp.setf(std::ios::showbase);
+                
+                    temp << "High bytes: " << ( (int) cinfo.Const.Long_info.high_bytes );
+                    buffer.push_back(temp.str());
+
+                    temp.str("");
+
+                    temp << "Low bytes: " << ( (int) cinfo.Const.Long_info.low_bytes ); // <- Arrumar
+                    buffer.push_back(temp.str());
+                
+                temp.unsetf(std::ios::showbase);
+                temp.unsetf(std::ios::basefield);
+
+
+                buffer.push_back("Long: " + std::to_string(getLongVal(cinfo)) );
+
             }
 
-            result += getTabs(is_recursive) + std::to_string(getLongVal(cinfo));
+            else {
+                buffer.push_back( std::to_string(getLongVal(cinfo)) );
+            }
+
             break;
 
         case Double_info_value:
             
-            if(not is_recursive){
-                result += "<Double_info>\n";
-                result += "High bytes: ";
-                result += std::to_string((int) cinfo.Const.Double_info.high_bytes) + "\n"; // <- Arrumar
-                result += "Low bytes: ";
-                result += std::to_string((int) cinfo.Const.Double_info.low_bytes) + "\n"; // <- Arrumar
+            if(not summarize){
+                buffer.push_back( "<Double_info>" );
+
+                temp.setf(std::ios::hex, std::ios::basefield); // <- Setando flags
+                temp.setf(std::ios::showbase); // <-
+
+                    temp << "High bytes: ";
+                    temp << ((int) cinfo.Const.Double_info.high_bytes);
+                    buffer.push_back(temp.str());
+                    
+                    temp.str(""); // <- Limpando o buffer
+
+                    temp << "Low bytes: ";
+                    temp << ((int) cinfo.Const.Double_info.low_bytes);
+                    buffer.push_back(temp.str());
+
+                temp.unsetf(std::ios::showbase);
+                temp.unsetf(std::ios::basefield);
+
+                buffer.push_back( "Double: " + std::to_string(getDoubleVal(cinfo)) );
+
+            }
+
+            else {
+                buffer.push_back(std::to_string(getDoubleVal(cinfo)));
             }
             
-            result += getTabs(is_recursive) + std::to_string(getDoubleVal(cinfo));
             break;
 
         case Class_info_value:
 
-            if(not is_recursive) {
-                result = "<Class_info>\n\n";
-                result += "Nome da classe: #";
-                result += std::to_string(cinfo.Const.Class_info.name_index) + " ";
+            if(not summarize) {
+                buffer.push_back("<Class_info>");
+                temp << "Nome da classe: #" << (cinfo.Const.Class_info.name_index) << " ";
+                temp << constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true).front();
+                buffer.push_back(temp.str());
             }
 
-            result += getTabs(is_recursive) + constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true);
+            else {
+                buffer.push_back( constantToString(cp[cinfo.Const.Class_info.name_index - 1], cp, true).front() );
+            }
+
             break;
 
         case String_info_value:
 
-            if(not is_recursive) {
-                result += "<String>\n";// +    
-                result += "String: #";
-                result += std::to_string(cinfo.Const.String_info.string_index) + " ";
+            if(not summarize) {
+                buffer .push_back( "<String>" );    
+                temp << "String: #" << (cinfo.Const.String_info.string_index) << " ";
+                temp << constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true).front();
+                
+                buffer.push_back( temp.str() );
             }
 
-            result += getTabs(is_recursive) + constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true);
+            else {
+                buffer.push_back( constantToString(cp[cinfo.Const.String_info.string_index - 1], cp, true).front() );
+            }
+
             break;
 
         case FieldRef_info_value:
 
-            if(not is_recursive) {
-                result += "<FieldRef_info>\n";// +
+            if(not summarize) {
+                buffer.push_back( "<FieldRef_info>" );
+                temp <<  "Nome da Classe: #" << (cinfo.Const.Fieldref_info.class_index) << " ";
+                temp << constantToString(cp[cinfo.Const.Fieldref_info.class_index - 1], cp, true).front();
+                
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                temp << "Nome e Tipo: #" << (cinfo.Const.Fieldref_info.name_and_type_index) << " ";
+                temp << constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true).front();
+
+                buffer.push_back( temp.str() );
+                temp.str("");
+
             }
 
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.Fieldref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.Fieldref_info.class_index - 1], cp, true);
-            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
-            result += std::to_string(cinfo.Const.Fieldref_info.name_and_type_index) + " ";
-            result += constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true);
+            else {
+                buffer.push_back( constantToString(cp[cinfo.Const.Fieldref_info.class_index - 1], cp, true).front() );
+
+                for(std::string &it : constantToString(cp[cinfo.Const.Fieldref_info.name_and_type_index -1], cp, true)) {
+                    buffer.push_back( it );
+                }
+            }
+
             break;
 
         case MethodRef_info_value:
 
-            if(not is_recursive) {
-                result += "<MethodRef_info>\n";// +
+            if(not summarize) {
+                buffer.push_back( "<MethodRef_info>" );
+                
+                temp <<  "Nome da Classe: #" << (cinfo.Const.Methodref_info.class_index) << " ";
+                temp << constantToString(cp[cinfo.Const.Methodref_info.class_index - 1], cp, true).front();
+                
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                temp << "Nome e Tipo: #" << (cinfo.Const.Methodref_info.name_and_type_index) << " ";
+                temp << constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true).front();
+
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+
             }
 
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.Methodref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.Methodref_info.class_index - 1], cp, true);
-            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
-            result += std::to_string(cinfo.Const.Methodref_info.name_and_type_index) + " ";
-            result += constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true);
+            else {
+                buffer.push_back( constantToString(cp[cinfo.Const.Methodref_info.class_index - 1], cp, true).front() );
+
+                for(std::string &it : constantToString(cp[cinfo.Const.Methodref_info.name_and_type_index -1], cp, true)) {
+                    buffer.push_back( it );
+                }
+            }
+
             break;
 
         case Intface_Ref_info_value:
             
-            if(not is_recursive) {
-                result += "<InterfaceMethodRef_info>\n";// +
+            if(not summarize) {
+                buffer .push_back("<InterfaceMethodRef_info>");
+                temp <<  "Nome da Classe: #" << (cinfo.Const.InterfaceMethodref_info.class_index) << " ";
+                temp << constantToString(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1], cp, true).front();
+                
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                temp << "Nome e Tipo: #" << (cinfo.Const.InterfaceMethodref_info.name_and_type_index) << " ";
+                temp << constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true).front();
+
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                
             }
 
-            result += "Nome da Classe: #" + std::to_string(cinfo.Const.InterfaceMethodref_info.class_index) + " ";
-            result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1], cp, true);
-            result += "\n" + getTabs(is_recursive) + "Name and Type: #";
-            result += std::to_string(cinfo.Const.InterfaceMethodref_info.name_and_type_index) + " ";
-            result += constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true);
+            else {
+                buffer.push_back( constantToString(cp[cinfo.Const.InterfaceMethodref_info.class_index - 1], cp, true).front() );
+
+                for(std::string &it : constantToString(cp[cinfo.Const.InterfaceMethodref_info.name_and_type_index -1], cp, true)) {
+                    buffer.push_back( it );
+                }
+            }
+
             break;
 
         case NameAType_info_value:
 
-            if(not is_recursive) {
-                result += "<NameAndType_info>\n"; // +
-                result += "Name: #" + std::to_string(cinfo.Const.NameAndType_info.name_index) + " "; 
-                result += constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true);
-                result += "\n " + getTabs(is_recursive) +  " Descriptor: #" + std::to_string(cinfo.Const.NameAndType_info.descriptor_index) + " "; 
-                result += constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true);
+            if(not summarize) {
+                buffer .push_back( "<NameAndType_info>" );
+                temp << "Nome: #" << (int) (cinfo.Const.NameAndType_info.name_index) << " ";
+                temp << constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true).front();
+                 
+                buffer.push_back( temp.str() );
+                temp.str(""); 
+
+                temp << "Descritor: #" << (cinfo.Const.NameAndType_info.descriptor_index) << " "; 
+                temp << constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true).front();
+                buffer.push_back( temp.str() );
+                temp.str(""); 
             }
             
             else {
-                result += constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true) + ": " +
-                constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true); 
+                buffer .push_back( constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true).front() + ": " +
+                constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true).front() ); 
             }
             
             break;
             
         case Method_Hand_info_value:
 
-            if(not is_recursive) {
-                result += "<Method Handle>\n";
+            if(not summarize) {
+                buffer .push_back( "<Method Handle>" );
+
+                temp << "Reference kind: " << (int) (cinfo.Const.MethodHandle_info.reference_kind); // <- Arrumar
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                temp << "Reference index: #" << (int) (cinfo.Const.MethodHandle_info.reference_index) << " ";
+
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                std::vector<std::string> ref_strings = 
+                constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
+
+                for(std::string s : ref_strings) {
+                    buffer.push_back(s);
+                }
             }
-            result += "Reference kind: " + std::to_string(cinfo.Const.MethodHandle_info.reference_kind); // <- Arrumar
-            result += "\n" + getTabs(is_recursive) + "Reference index: #" + std::to_string(cinfo.Const.MethodHandle_info.reference_index) + " ";
-            result += constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
+
+            else {
+                buffer.push_back(std::to_string( (int) cinfo.Const.MethodHandle_info.reference_kind) );
+
+                buffer.push_back( std::to_string( (int) cinfo.Const.MethodHandle_info.reference_index) );
+
+                std::vector<std::string> ref_strings = 
+                constantToString(cp[cinfo.Const.MethodHandle_info.reference_index - 1], cp, true);
+
+                for(std::string s : ref_strings) {
+                    buffer.push_back(s);
+                }
+
+            }
+
             break;
             
         case Method_Type_info_value:
 
-            if(not is_recursive) {
-                result += "<MethodType_info>\n";
-                result += "Descriptor index: # " + std::to_string(cinfo.Const.MethodType_info.descriptor_index) + " ";
+            if(not summarize) {
+                buffer.push_back( "<MethodType_info>" );
+                temp << "Descriptor index: #" << (cinfo.Const.MethodType_info.descriptor_index) << " ";
+                temp << getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
+
+                buffer.push_back( temp.str() );
+                temp.str("");
             }
 
-            result += getTabs(is_recursive) + getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]);
+            else {
+                buffer.push_back( getUtf8Const(cp[cinfo.Const.MethodType_info.descriptor_index - 1]) );
+            }
+
             break;
             
         case Inv_Dyn_info_value:
 
-            if(not is_recursive) {
-                result += "<Invoke Dynamic> \n";
+            if(not summarize) {
+                buffer .push_back( "<Invoke Dynamic>" );
+                temp << "Bootstrap Method Attribute Index: ";
+                temp << (cinfo.Const.InvokeDynamic_info.bootstrap_method_attr_index);
+
+                buffer.push_back( temp.str() );
+                temp.str("");
+
+                auto strings = constantToString(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1], cp, false);
+                
+                for(const std::string &s : strings) {
+                    buffer.push_back(s);
+                }
             }
 
-            result += "Bootstrap Method Attribute Index: " + 
-            std::to_string(cinfo.Const.InvokeDynamic_info.bootstrap_method_attr_index) + "\n";
-            result += getTabs(is_recursive) + "Name and type: #" +
-            std::to_string(cinfo.Const.InvokeDynamic_info.name_and_type_index) + " " +
-            constantToString(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1], cp, true);
+            else {
+                
+                buffer.push_back( std::to_string(cinfo.Const.InvokeDynamic_info.bootstrap_method_attr_index) );
+                auto strings = constantToString(cp[cinfo.Const.InvokeDynamic_info.name_and_type_index - 1], cp, true);
+                
+                for(const std::string &s : strings) {
+                    buffer.push_back(s);
+                }
+            }
 
             break;
             
@@ -215,7 +383,7 @@ std::string constantToString(const cp_info &cinfo, const vector<cp_info> &cp, bo
             break;
     }
 
-    return result;
+    return buffer;
 }
 
 std::vector<std::string> getAccessFlagString(u2 flags, int type) {
@@ -223,21 +391,21 @@ std::vector<std::string> getAccessFlagString(u2 flags, int type) {
     // type -> class_file = 0, fields = 1, method = 2, 
 
     std::vector<std::pair<u2, std::vector<std::string>>> stringMask = {
-        {0x0001,  {"ACC_PUBLIC", "ACC_PUBLIC", "ACC_PUBLIC"}},
-        {0x0002,  {"ACC_PRIVATE", "ACC_PRIVATE", "ACC_PRIVATE"}},
-        {0x0004,  {"ACC_PROTECTED", "ACC_PROTECTED", "ACC_PROTECTED"}},
-        {0x0008,  {"ACC_STATIC", "ACC_STATIC", "ACC_STATIC"}},
-        {0x0010,  {"ACC_FINAL", "ACC_FINAL", "ACC_FINAL"}},
-        {0x0020,  {"ACC_SUPER", "", "ACC_SYNCHRONIZED"}},
-        {0x0040,  {"ACC_BRIDGE", "ACC_VOLATILE", "ACC_BRIDGE"}},
-        {0x0080,  {"ACC_VARARGS", "ACC_TRANSIENT", "ACC_VARARGS"}},
-        {0x0100,  {"ACC_NATIVE", ""," ACC_NATIVE"}},
-        {0x0200,  {"ACC_INTERFACE", "",""}},
-        {0x0400,  {"ACC_ABSTRACT", "", "ACC_ABSTRACT"}},
-        {0x0800,  {"ACC_STRICT", "", "ACC_STRICT"}},
-        {0x1000,  {"ACC_SYNTHETIC", "ACC_SYNTHETIC", "ACC_SYNTHETIC"}},
-        {0x2000,  {"ACC_ANNOTATION", "", ""}},
-        {0x4000,  {"ACC_ENUM", "ACC_ENUM", ""}}
+        {0x0001,  {"ACC_PUBLIC",     "ACC_PUBLIC",       "ACC_PUBLIC"}},
+        {0x0002,  {"ACC_PRIVATE",    "ACC_PRIVATE",      "ACC_PRIVATE"}},
+        {0x0004,  {"ACC_PROTECTED",  "ACC_PROTECTED",    "ACC_PROTECTED"}},
+        {0x0008,  {"ACC_STATIC",     "ACC_STATIC",       "ACC_STATIC"}},
+        {0x0010,  {"ACC_FINAL",      "ACC_FINAL",        "ACC_FINAL"}},
+        {0x0020,  {"ACC_SUPER",      "",                 "ACC_SYNCHRONIZED"}},
+        {0x0040,  {"ACC_BRIDGE",     "ACC_VOLATILE",     "ACC_BRIDGE"}},
+        {0x0080,  {"ACC_VARARGS",    "ACC_TRANSIENT",    "ACC_VARARGS"}},
+        {0x0100,  {"ACC_NATIVE",     "",                 " ACC_NATIVE"}},
+        {0x0200,  {"ACC_INTERFACE",  "",                 ""}},
+        {0x0400,  {"ACC_ABSTRACT",   "",                 "ACC_ABSTRACT"}},
+        {0x0800,  {"ACC_STRICT",     "",                 "ACC_STRICT"}},
+        {0x1000,  {"ACC_SYNTHETIC",  "ACC_SYNTHETIC",    "ACC_SYNTHETIC"}},
+        {0x2000,  {"ACC_ANNOTATION", "",                 ""}},
+        {0x4000,  {"ACC_ENUM",       "ACC_ENUM",         ""}}
     };
 
     std::vector<std::string> flags_str;
@@ -293,7 +461,13 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
 
     else if(opcode == 18) { // ldc
         
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[bytecode[idx + 1] - 1], cf.constant_pool, true));
+        buffer_str << "( ";
+        
+        auto constInfoStr = constantToString(cf.constant_pool[bytecode[idx + 1] - 1], cf.constant_pool, true);
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " )\n" : ", ");
+        }
 
         quant_bytes = 2;
     }
@@ -301,7 +475,13 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     else if(opcode >= 19 and opcode <= 20) { // ldc_w and ldc2_w
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
 
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        buffer_str << "( ";
+        auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " )\n" : ", ");
+        }
+
         quant_bytes = 3;
     }
 
@@ -469,10 +649,14 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         quant_bytes = 1;
     }
 
-    else if(opcode >= 178 and opcode <= 184) { // get/put-> static, field, virtual, special
+    else if(opcode >= 178 and opcode <= 184) { // get/put-> static, field; invoke -> virtual, special
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
 
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
         quant_bytes = 3;
 
     }
@@ -480,23 +664,37 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     else if(opcode == 185) { // invokeinterface
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
-        buffer_str << " count =  " << bytecode[idx + 3]; 
-        quant_bytes = 4;
+        auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
+
+        buffer_str << getTabs(tabs_count + 1) << " count =  " << bytecode[idx + 3]; 
+        quant_bytes = 5;
     }
 
     else if(opcode == 186) { //  invokedynamic
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
 
-        quant_bytes = 4;
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
+
+        quant_bytes = 5;
     }
 
     else if(opcode  == 187) { // new
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
+
 
         quant_bytes = 3;
     }
@@ -507,10 +705,14 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         quant_bytes = 2;
     }
 
-    else if(opcode == 189) { // arrays
+    else if(opcode == 189) { // anewarray
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
 
         quant_bytes = 3;
     }
@@ -522,7 +724,11 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     else if(opcode >= 192 and opcode <= 193) {
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
 
         quant_bytes = 3;    
     }
@@ -550,8 +756,12 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     else if(opcode == 197) { // multinewarray
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
-        buffer_str << getEmbracers(constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true))
-        << (int) bytecode[idx + 3] << " dimensoes ";
+        auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
+        for(int i = 0; i < constInfoStr.size(); i++) {
+            buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
+        }
+
+        buffer_str << getTabs(tabs_count + 1) << "dimensoes: " <<  (int) bytecode[idx + 3];
 
         quant_bytes = 4;
     }
@@ -591,10 +801,9 @@ std::string getTabs(int count) {
     if(count == 1)
         return "\t";
 
-    if(count % 2 == 1)
-        tabs = getTabs(count / 2) + getTabs(count / 2) + "\t";
-    else
-        tabs = getTabs(count / 2) + getTabs(count / 2);
+    for(int i = 0; i < count; i++) {
+        tabs.push_back('\t');
+    }
 
     return tabs;
 }
