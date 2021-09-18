@@ -119,3 +119,58 @@ float getFloatVal(const cp_info &const_info)
 
     return s * m * pow(2, e - 150);
 }
+
+
+cp_info::~cp_info()  {
+
+    if(this->tag == 1) // Constante == Utf8
+        delete[] this->Const.Utf8.bytes;
+}
+
+method_info::~method_info() {
+
+    // delete[] this->attributes;
+}
+
+// Isso tudo num serve de nada kkkk.
+attribute_info::~attribute_info() {
+
+    // std::cout << "oi, voce deletou " << this->att_name;
+    // getchar();
+    if(del_map.count(this->att_name) > 0) {
+        del_map[this->att_name](this);
+    }
+
+}
+
+void delConstant(attribute_info* att) {
+
+    return;
+}
+
+void delCode(attribute_info* att) {
+
+    // delete[] att->attr.Code.code;
+    // delete[] att->attr.Code.except_tb_array;
+    // delete[] att->attr.Code.attributes;
+}
+
+void delExceptions(attribute_info * att) {
+
+    // delete[] att->attr.Exceptions.exception_index_table_array;
+}
+
+void delLineNumberTable(attribute_info* att) {
+
+    // delete[] att->attr.LineNumberTable.l_num_table_array;
+}
+
+void delLocalVariableTable(attribute_info* att) {
+
+    // delete[] att->attr.LocalVariableTable.lv_tb_array;
+}
+
+void delSourceFile(attribute_info* att) {
+
+    return;
+}

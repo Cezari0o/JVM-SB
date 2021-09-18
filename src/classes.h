@@ -9,6 +9,7 @@
 #define CLASSES_H_
 
 #include "someTools.h"
+#include <map>
 #include <vector>
 #include <cmath>
 
@@ -59,8 +60,12 @@ typedef struct {
  * @global
  */
 typedef struct attribute_info {
+    
+    ~attribute_info();
+
     u2 att_name_idx;
     u4 att_length;
+    std::string att_name;
 
     union {
         struct {
@@ -130,6 +135,8 @@ typedef struct field_info {
  * @global
  */
 typedef struct method_info {
+
+    ~method_info();
     u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
@@ -147,6 +154,7 @@ typedef struct method_info {
 typedef struct cp_info {
     u1 tag;
 
+    ~cp_info();
     union {
       struct{
          u2 name_index;
@@ -306,5 +314,27 @@ float getFloatVal(const cp_info &const_info);
  * @return Valor long montado.
  */
 long long getLongVal(const cp_info &const_info);
+
+
+typedef void attr_del_func(attribute_info*);
+
+// Funcoes para deletar atributos
+void delConstant(attribute_info*);
+void delCode(attribute_info*);
+void delExceptions(attribute_info*);
+void delSourceFile(attribute_info*);
+void delLineNumberTable(attribute_info*);
+void delLocalVariableTable(attribute_info*);
+
+
+static std::map<std::string, attr_del_func*> del_map = {
+                                                        {"ConstantValue", delConstant},
+                                                        {"Code", delCode},                                                
+                                                        {"Exceptions", delExceptions},
+                                                        {"SourceFile", delSourceFile},
+                                                        {"LineNumberTable", delLineNumberTable},
+                                                        {"LocalVariableTable", delLocalVariableTable}
+                                            };
+
 
 #endif

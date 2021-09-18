@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <stdint.h>
 
 // Definicoes para uso nos demais arquivos
 typedef unsigned char  u1; // <- 1 Byte

@@ -56,6 +56,8 @@ int readCode(std::fstream &file, attribute_info &att, const std::vector<cp_info>
             alo = readAttr(file, cp);
 
             att.attr.Code.attributes[i] = *alo; // <- Talvez tenha erro aqui, vazamento de memoria
+
+            delete alo;
         }
     }
 
@@ -156,7 +158,8 @@ attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp) {
     }
 
     std::string attr_name = getUtf8Const(cp.at(att->att_name_idx - 1));
-    
+    att->att_name = attr_name;
+
     if(func_map.count(attr_name)) {
         func_map[attr_name](file, *att, cp);
     }
