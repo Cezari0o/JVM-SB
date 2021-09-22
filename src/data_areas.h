@@ -2,7 +2,6 @@
 #define DATA_AREAS_H_
 
 #include "classes.h"
-#include "jvm_types.h"
 #include <vector>
 #include <stack>
 #include "any.h"
