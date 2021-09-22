@@ -230,7 +230,7 @@ typedef struct cp_info {
  * 
  * @brief Armazena os dados contidos em um arquivo .class.
  *
- * @ 
+ *  
  * @author	Gabriel Cesário 
  * @since	v0.0.1
  * @version	v1.0.0	Sunday, September 5th, 2021.
