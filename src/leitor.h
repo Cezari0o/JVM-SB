@@ -44,7 +44,7 @@ using namespace std;
  * @return	O Classfile lido.
  * @sa      ClassFile
  */
-ClassFile readClassFile(const std::string &path);
+ClassFile readClassFile(const std::string &path); // <-  Arrumar as excecoes nesta funcao
 
 #endif
 

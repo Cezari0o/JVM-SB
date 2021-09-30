@@ -117,7 +117,7 @@ void showClassFile(const ClassFile &myClass, std::ostream &outstream);
 static std::map<std::string, printAttr*> func_show_map = {
                                                 // {},
                                                 {"Code", printCode},
-                                                {"ConstValue", printConstValue},                                                
+                                                {"ConstantValue", printConstValue},                                                
                                                 {"Exceptions", printExceptions},
                                                 {"SourceFile", printSourceFile},
                                                 {"LineNumberTable", printLineNumberTable},

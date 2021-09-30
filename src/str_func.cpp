@@ -807,3 +807,17 @@ std::string getTabs(int count) {
 
     return tabs;
 }
+
+
+std::string getClassName(const ClassFile &cf) {
+    std::string class_name;
+
+    if(cf.this_class == 0)
+        return "Object";
+
+    auto cp = cf.constant_pool;
+
+    class_name = constantToString(cp[cf.this_class - 1], cp).front();
+
+    return class_name;
+}

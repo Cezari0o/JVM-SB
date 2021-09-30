@@ -23,5 +23,6 @@ std::string getEmbracers(const T &item);
 std::string getMajorVersionString(u2 major_version);
 std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1* bytecode, const ClassFile &cf, size_t tabs_count);
 std::string getTabs(int count);
+std::string getClassName(const ClassFile& cf);
 
 #endif
