@@ -400,6 +400,410 @@ void method_area::prepare_class(std::string &class_name) {
 
 }
 
+class_space &method_area::get_class(class_space *calling_class, const std::string &class_name) {
+
+    this->load_class(class_name);
+
+    class_space *required_class;
+
+    try{
+        required_class = &(this->classes.at(class_name));
+    }
+    catch(const std::exception& e) {
+        stringstream buffer;
+        buffer << "(Area de metodos) Erro no carregamento de classe\n";
+        buffer << "Nome da classe requerida: " << class_name << "\n";
+        buffer << "Erro encontrado: " << e.what() << "\n";
+
+        throw Exception(buffer.str());
+    }
+    
+    u2 flags_calling_class  = calling_class->get_class_file().access_flags;
+    u2 flags_required_class = required_class->get_class_file().access_flags;
+
+    if(!(flags_required_class & ACCESS_FLAGS_CLASS_FILE::ACC_PUBLIC)) {
+        stringstream buffer;
+        buffer << "(Area de metodos) ";
+        buffer << "A classe requerida possui acesso restrito!\n";
+        buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+        buffer << "Classe requerida: " << required_class->get_class_name() << "\n";
+
+        std::cout << buffer.str();
+        // throw IllegalAccessError(buffer.str());
+    }
+
+    return *required_class;
+}
+
+bool method_area::is_sub_class(class_space &some_class, class_space &super_class) {
+    const ClassFile &some_class_cf = (some_class.get_class_file());
+    std::string super_from_some_class_name = constantToString(
+        some_class_cf.constant_pool.at(some_class_cf.super_class - 1), 
+        some_class_cf.constant_pool).front();
+
+    if(super_from_some_class_name != super_class.get_class_name()) {
+
+        if(super_from_some_class_name == "java/lang/Object") {
+            return false;
+        }
+
+        this->load_class(super_from_some_class_name);
+        class_space &super_class_from_some_class = this->get_class(super_from_some_class_name);
+
+        return this->is_sub_class(super_class_from_some_class, super_class);
+    }
+
+    else {
+        return true;
+    }
+}
+
+Field_t &method_area::get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type) {
+    stringstream buffer; // Buffer para armazenar mensagem de erro, caso aconteca
+    buffer << "(Area de metodos) Erro em adquirir o field da classe!\n";
+    buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+    buffer << "Classe do field: " << class_name << "\n";
+    buffer << "Field name : " << name_and_type.first << "\n";
+    buffer << "Field descriptor: " << name_and_type.second << "\n"; 
+
+    class_space *required_class;
+
+    try {
+        required_class = &(this->get_class(calling_class, class_name));
+
+    } catch(const Exception &e) {
+        buffer << "Erro: " << e.get_exception_name() << "\n";
+        buffer << "Erro ao carregar classe: " << e.what() << "\n";
+        throw Linkage_Error_Exception(buffer.str());
+    }
+
+    auto &cf_required = required_class->get_class_file();
+    bool found_field = false;
+    Field_t *class_field = nullptr;
+
+    for(auto &f : cf_required.fields) {
+        std::string f_name, f_descriptor;
+        f_name       = getUtf8Const(cf_required.constant_pool.at(f.name_index - 1));
+        f_descriptor = getUtf8Const(cf_required.constant_pool.at(f.descriptor_index - 1));
+
+        if(f_name == name_and_type.first and f_descriptor == name_and_type.second) {
+            
+            if(not (f.access_flags & ACCESS_FLAGS_FIELDS::ACC_STATIC)) { //<- Tirar caso use este metodo para carregar fields de objetos 
+                buffer << "O field requerido nao e' estatico!\n";
+                throw ItemNotFoundError(buffer.str());
+
+            }
+
+            if(f.access_flags & ACCESS_FLAGS_FIELDS::ACC_PUBLIC) {
+                found_field = true;
+                class_field = required_class->get_class_field(f_name);
+            }
+
+            else if(f.access_flags & ACCESS_FLAGS_FIELDS::ACC_PROTECTED) {
+
+                if(calling_class->get_class_name() != class_name) {
+                    if(not this->is_sub_class(*calling_class, *required_class)) {
+                        buffer << "Field nao acessivel a class chamadora!\n";
+
+                        throw IllegalAccessError(buffer.str());
+                    }
+                }
+                found_field = true;
+                class_field = required_class->get_class_field(f_name);
+            }
+
+            else if((not (ACCESS_FLAGS_FIELDS::ACC_PUBLIC & f.access_flags)) or (not (ACCESS_FLAGS_FIELDS::ACC_PRIVATE & f.access_flags))
+            or (not (ACCESS_FLAGS_FIELDS::ACC_PROTECTED & f.access_flags))) {
+                // Num sei
+                found_field = true;
+                class_field = required_class->get_class_field(f_name);
+            }
+
+            else if(f.access_flags & ACCESS_FLAGS_FIELDS::ACC_PRIVATE) {
+
+                if(calling_class->get_class_name() != class_name) {
+                    buffer << "Acesso ilegal a field de classe, o field e' privado!\n";
+
+                    throw IllegalAccessError(buffer.str());
+                }
+
+                else {
+                    found_field = true;
+                    class_field = required_class->get_class_field(f_name);
+                }
+            }
+
+            else {
+                buffer << "O field encontrado nao possui flags de acesso validas!\n";
+
+                throw Linkage_Error_Exception(buffer.str());
+            }
+
+            break;
+        }
+    }
+
+
+    // fazer a procura do field nas superinterfaces diretas da classe
+    if(!found_field) {
+        if(cf_required.super_class != 0) {
+
+            std::string super_class_name = constantToString(
+                cf_required.constant_pool.at(cf_required.super_class - 1), cf_required.constant_pool).front();
+
+            return this->get_class_field(calling_class, super_class_name, name_and_type);
+        }
+
+        else {
+            buffer << "Field nao encontrado!\n";
+
+            throw NoSuchFieldError(buffer.str()); 
+        }
+    }
+
+    return *class_field;
+    
+}
+
+method_info method_area::get_class_method(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string> &name_and_type) {
+    std::stringstream buffer;
+    buffer << "(Area de Metodos) Erro ao carregar o metodo de classe!\n";
+    buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+    buffer << "Classe requerida: " << class_name << "\n";
+    buffer << "Nome do metodo: "   << name_and_type.first << "\n";
+    buffer << "Descriptor: "       << name_and_type.second << "\n";
+
+    class_space *required_class;
+
+    try {
+        required_class = &(this->get_class(calling_class, class_name));
+    } catch(const Exception &e) {
+        buffer << "Erro ao carregar classe\n";
+        buffer << e.what() << "\n";
+
+        throw Linkage_Error_Exception(buffer.str());
+    }
+
+    auto &required_cf = required_class->get_class_file();
+    method_info required_method;
+    bool found_method = false;
+    // Se temos uma classe C indicada por class_name:
+
+    // Verificar se classe C eh uma interface
+    if(required_cf.access_flags & ACCESS_FLAGS_CLASS_FILE::ACC_INTERFACE) {
+        buffer << "A classe declarada e' uma interface\n";
+        buffer << "Nao e' possivel carregar metodos de classe em interfaces.\n";
+
+        throw IncompatibleClassChangeError(buffer.str());
+    }
+
+    // Se a classe C tiver o metodo com o mesmo nome e descriptor, retornar este metodo
+    try {
+        required_method =  required_class->get_method(name_and_type.first, name_and_type.second);
+        found_method = true;
+    } catch(const Exception &e) {}
+
+    // Caso contrario, verificar nas superclasses de C se o metodo procurado existe,
+    // caso a classe C tenha superclasses
+    if(not found_method) {
+        if(required_cf.super_class != 0) {
+            std::string super_class_name = constantToString(
+                required_cf.constant_pool.at(required_cf.super_class - 1), required_cf.constant_pool).front();
+
+            try {
+                required_method = this->get_class_method(calling_class, super_class_name, name_and_type);
+                found_method = true;
+            } catch(const Exception &e){}
+        }
+    }
+
+    // Se nao der certo, procurar na superinterfaces diretas de C
+    if(not found_method) {
+        for(auto &interface_idx : required_cf.interfaces) {
+            
+            if(not found_method) {
+
+                std::string super_interface_name = constantToString(
+                    required_cf.constant_pool.at(interface_idx - 1), required_cf.constant_pool).front();
+
+                try {
+                    required_method = this->get_interface_method(calling_class, super_interface_name, name_and_type);
+
+                    if(( not (required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PRIVATE) ) 
+                            and ( not (required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_STATIC) ) ) {
+                                found_method = true;
+                        }
+                } catch(const Exception &e) {}
+            }
+        }
+
+    }
+
+    if(not found_method) {
+        buffer << "Metodo nao encontrado!\n";
+        throw NoSuchMethodError(buffer.str());
+    }
+
+    else { // Verificando acessibilidade do metodo
+        
+        if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PUBLIC) {}
+
+        else if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PROTECTED) {
+
+            if(calling_class->get_class_name() != class_name) {
+                if(not this->is_sub_class(*calling_class, *required_class)) {
+                    buffer << "Metodo nao acessivel a classe chamadora!\n";
+
+                    throw IllegalAccessError(buffer.str());
+                }
+            }
+        }
+
+        else if((not (ACCESS_FLAGS_METHODS::ACC_PUBLIC & required_method.access_flags)) or (not (ACCESS_FLAGS_METHODS::ACC_PRIVATE & required_method.access_flags))
+        or (not (ACCESS_FLAGS_METHODS::ACC_PROTECTED & required_method.access_flags))) {
+            // Num sei
+        }
+
+        else if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PRIVATE) {
+
+            if(calling_class->get_class_name() != class_name) {
+                buffer << "Acesso ilegal ao metodo. O metodo e' privado!\n";
+
+                throw IllegalAccessError(buffer.str());
+            }
+        }
+
+        else {
+            buffer << "O metodo encontrado nao possui flags de acesso validas!\n";
+
+            throw Linkage_Error_Exception(buffer.str());
+        }
+        
+    }
+
+    return required_method;
+}
+
+method_info method_area::get_interface_method(class_space *calling_class, const std::string &interface_name, const std::pair<std::string, std::string> &name_and_type) {
+    std::stringstream buffer;
+    buffer << "(Area de Metodos) Erro ao carregar o metodo de interface!\n";
+    buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+    buffer << "Interface requerida: " << interface_name << "\n";
+    buffer << "Nome do metodo: "   << name_and_type.first << "\n";
+    buffer << "Descriptor: "       << name_and_type.second << "\n";
+    
+    class_space *required_interface; 
+
+    try {
+        required_interface = &(this->get_class(calling_class, interface_name));
+    } catch(const Exception &e) {
+        buffer << "Erro ao carregar interface\n";
+        buffer << e.what() << "\n";
+
+        throw Linkage_Error_Exception(buffer.str());
+    }
+
+    bool found_method = false;
+    method_info required_method;
+    auto &interface_cf = required_interface->get_class_file();
+
+    if(not (interface_cf.access_flags & ACCESS_FLAGS_CLASS_FILE::ACC_INTERFACE)) {
+        buffer << "A classe requerida nao e' uma interface\n";
+        buffer << "E' possivel carregar apenas metodos de interface com esta funcao!\n";
+
+        throw IncompatibleClassChangeError(buffer.str());
+    }
+
+    try {
+        required_method = required_interface->get_method(name_and_type.first, name_and_type.second);
+        found_method = true;
+    } catch(const Exception &e) {}
+
+
+    if(not found_method) {
+
+        class_space *Object_class = &(this->get_class("java/lang/Object"));
+
+        for(auto &m : Object_class->get_class_file().methods) {
+            std::string m_name      = getUtf8Const(Object_class->get_const_pool().at(m.name_index - 1));
+            std::string m_descript  = getUtf8Const(Object_class->get_const_pool().at(m.descriptor_index - 1));
+
+
+            if(m_name == name_and_type.first and m_descript == name_and_type.second and 
+                ACCESS_FLAGS_METHODS::ACC_PUBLIC & m.access_flags and 
+                not (ACCESS_FLAGS_METHODS::ACC_STATIC & m.access_flags)) {
+                required_method = m;
+                found_method = true;
+                break;
+            }
+
+        }
+    }
+
+    if(not found_method) {
+
+        for(auto &interface_idx : interface_cf.interfaces) {
+            std::string super_interface_name = constantToString(
+                interface_cf.constant_pool.at(interface_idx - 1), interface_cf.constant_pool).front(); 
+
+            if (not found_method) {
+                try {
+                    required_method = this->get_interface_method(calling_class, super_interface_name, name_and_type);
+                    
+                    if((not (required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PRIVATE) ) 
+                        and ( not (required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_STATIC) )) {
+                            found_method = true;
+                    }
+                } catch(const Exception &e) {}
+            }
+
+        }
+    }
+
+    if(not found_method) {
+        buffer << "Metodo de interface nao encontrado!\n";
+
+        throw NoSuchMethodError(buffer.str());
+    }
+
+    else { // Verificando acessibilidade do metodo
+        if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PUBLIC) {}
+
+        else if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PROTECTED) {
+
+            if(calling_class->get_class_name() != interface_name) {
+                if(not this->is_sub_class(*calling_class, *required_interface)) {
+                    buffer << "Metodo nao acessivel a classe chamadora!\n";
+
+                    throw IllegalAccessError(buffer.str());
+                }
+            }
+        }
+
+        else if((not (ACCESS_FLAGS_METHODS::ACC_PUBLIC & required_method.access_flags)) or (not (ACCESS_FLAGS_METHODS::ACC_PRIVATE & required_method.access_flags))
+        or (not (ACCESS_FLAGS_METHODS::ACC_PROTECTED & required_method.access_flags))) {
+            // Num sei
+        }
+
+        else if(required_method.access_flags & ACCESS_FLAGS_METHODS::ACC_PRIVATE) {
+
+            if(calling_class->get_class_name() != interface_name) {
+                buffer << "Acesso ilegal a metodo de interface, o metodo e' privado!\n";
+
+                throw IllegalAccessError(buffer.str());
+            }
+        }
+
+        else {
+            buffer << "O metodo encontrado nao possui flags de acesso validas!\n";
+
+            throw Linkage_Error_Exception(buffer.str());
+        }
+    }
+
+    return required_method;
+}
+
 Array_t *get_array(std::string descriptor) { // Num sei o q fazer ainda
     Array_t* a;
 

@@ -5,6 +5,7 @@
 #include <stack>
 #include <map>
 #include <string>
+#include <ostream>
 
 #include "classes.h"
 #include "any.h"
@@ -14,6 +15,7 @@
 #include "leitor.h"
 #include "access_flags.h"
 #include "descript_types.h"
+#include "someTools.h"
 
 class pc_register {
 
@@ -86,6 +88,8 @@ class class_space {
         field_info  get_field_info(const size_t field_idx) { return this->fields_info->at(field_idx); }
 
         
+        const ClassFile &get_class_file() { return *(this->my_classfile); }
+
         Field_t *get_class_field(const u2 &name_idx);
         Field_t *get_class_field(const cp_info &field_ref); // <- Talvez arrumar !!!!!!!!!!!!!!!!!!!!!
         std::vector<cp_info> &get_const_pool() { return *(this->runtime_cp); }; // When call this function, do not alter the result!!! 
@@ -98,6 +102,9 @@ class method_area { // <- Arrumar
     std::map<std::string, class_space> classes;
 
     void prepare_class(std::string &class_name);
+    bool is_sub_class(class_space &some_class, class_space &super_class);
+    class_space &get_class(const std::string &class_name); // <- Apenas recupera a classe, sem verificar flags de acesso
+
 
     public:
         method_area() = default;
@@ -110,10 +117,22 @@ class method_area { // <- Arrumar
         void insert_new_class(ClassFile*);
         // method_info get_method();
         void remove_class(const std::string& class_name);
-        class_space &get_class(const std::string &class_name);
 
         template<class T>
         T &get_item(const cp_info &ref_item); // <-- provisorio (ainda nao implementado)
+
+
+        class_space &get_class(class_space* calling_class, const std::string &class_name); // <-- Carrega a classe se ela ainda nao ta na area de metodos
+        //              ^
+        //              |
+        //              |
+        // Talvez arrumar para considerar arrays!!!
+
+        Field_t &get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type);
+
+        method_info get_class_method(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
+
+        method_info get_interface_method(class_space *calling_class, const std::string &interface_name, const std::pair<std::string, std::string> &name_and_type);
 
         void load_class(const std::string &_class_path);
 
