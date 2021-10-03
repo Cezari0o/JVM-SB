@@ -126,6 +126,7 @@ std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, c
             f->descriptor_index = read2Byte(file);
             f->attributes_count = read2Byte(file);
             f->attributes       = new attribute_info[f->attributes_count];
+            // f->attributes.resize(f->attributes_count);
 
             for(int j = 0; j < f->attributes_count; j++) {
                 attribute_info* attr_f = readAttr(file, cp);
@@ -200,6 +201,7 @@ ClassFile readClassFile(const std::string &path){
     file.open(path, std::fstream::in | std::fstream::binary);
 
     if(!file.is_open()) {
+        throw ClassNotFoundException("Classe " + path + " nao encontrada!");
         showExcept("Nao foi possivel abrir o arquivo");
     }
 

@@ -7,6 +7,69 @@
 #include "any.h"
 #include "except.h"
 
+class Array_t {
+
+    private:
+        std::vector<Any> my_data;
+        int my_type;
+
+    public:
+
+        Array_t(int type) { this->my_type = type; }
+
+        Array_t(int type, size_t size) { 
+            this->my_type = type;
+            my_data.resize(size);     
+        }
+
+        ~Array_t() = default;
+
+        int get_type() { return this->my_type; }
+
+        size_t size() { return this->my_data.size(); }
+
+        template<class T>
+        T &at(size_t idx) { return this->my_data.at(idx).as<T>(); }
+
+        template<class T>
+        T &operator[](size_t idx) { return this->my_data.at(idx).as<T>(); }
+};
+
+class Field_t {
+
+    private:
+        int data_type = 0;
+
+    public:
+        Any data;
+
+    Field_t() = default;
+
+    template<class T>
+    Field_t(const T &value) { this->data = value; }
+    ~Field_t() { if (this->data.is<Array_t *>()) {
+                    delete this->data.as<Array_t *>();
+                 }
+               };
+
+    template<class T>
+    T &get_d() { return this->data.as<T>(); }
+
+    template<class T>
+    T &set_field(const T &value) {  this->data = value;
+                                    return this->get_d<T>();
+                                 }
+
+    template<class T>
+    T &operator=(const T &value) { return this->set_field(value); }
+
+    Field_t &operator=(const Field_t &f) {
+        this->data = f.data;
+        return (*this);
+    }
+};
+
+
 class Object {
 
     private:
@@ -14,6 +77,12 @@ class Object {
     std::string my_name; // <- ???
     std::map<std::string, class Field_t*> my_fields;
     Any single_value; // <- Para uso por outros tipos de classes, como Arrays por exemplo
+
+    // template<class T>
+    // void delete_field(Field_t* field) {
+    //     Any h;
+    //     h.~Any
+    // }
 
     public:
 
@@ -28,12 +97,20 @@ class Object {
     Object();
     
     ~Object() {
+
+        // for_each(this->my_fields.begin(), this->my_fields.end(), 
+        // [] (pair<const std::string, Field_t*> &value) {
+        //     Field_t* field_to_del = value.second;
+        //     delete field_to_del;
+        // });
+
         for(auto &it : this->my_fields) {
             delete it.second;
         }
 
         if(single_value.is<Array_t*>()) {
-            delete single_value.as<Array_t*>();
+            Array_t* to_del = single_value.as<Array_t*>();
+            delete to_del;
         }
     };
 
@@ -62,64 +139,6 @@ class Object {
 
         throw ItemNotFoundError(error_buffer.str());
     };
-};
-
-class Field_t {
-
-    private:
-        Any data;
-        int data_type = 0;
-
-    public:
-
-    Field_t() = default;
-
-    template<class T>
-    Field_t(const T &value) { this->data = value; }
-    ~Field_t() { if (this->data.is<Array_t *>()) {
-                    delete this->data.as<Array_t *>();
-                 }
-               };
-
-    template<class T>
-    T &get_d() { return this->data.as<T>(); }
-
-    template<class T>
-    T &set_field(const T &value) {  this->data = value;
-                                    return this->get_d<T>();
-                                 }
-
-    template<class T>
-    T &operator=(const T &value) { return this->set_field(value); }
-};
-
-
-class Array_t {
-
-    private:
-        std::vector<Any> my_data;
-        int my_type;
-
-    public:
-
-        Array_t(int type) { this->my_type = type; }
-
-        Array_t(int type, size_t size) { 
-            this->my_type = type;
-            my_data.resize(size);     
-        }
-
-        ~Array_t() = default;
-
-        int get_type() { return this->my_type; }
-
-        size_t size() { return this->my_data.size(); }
-
-        template<class T>
-        T &at(size_t idx) { return this->my_data.at(idx).as<T>(); }
-
-        template<class T>
-        T &operator[](size_t idx) { return this->at(idx); }
 };
 
 #endif

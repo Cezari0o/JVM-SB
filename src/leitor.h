@@ -15,6 +15,7 @@
 #include <bits/stdc++.h>
 #include "classes.h"
 #include "attr_functions.h"
+#include "except.h"
 
 using namespace std;
 

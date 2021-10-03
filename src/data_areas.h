@@ -62,16 +62,14 @@ class jvm_stack {
 class class_space {
 
     private:
-        std::string class_name = "";
+        std::string class_name;
 
         ClassFile *my_classfile;
         std::vector<cp_info> *runtime_cp;
 
-
-        std::map<std::string, Field_t*> fields_data; // <- Contem os fields estaticos
-
         
     public:
+        std::map<std::string, Field_t*> fields_data; // <- Contem os fields estaticos
 
         const std::vector<method_info> *methods_info;
         const std::vector<field_info>  *fields_info;
@@ -81,7 +79,9 @@ class class_space {
         method_info get_method(const u2 &name_idx, const u2 &descriptor_idx) ;
 
         std::string get_class_name() const { return this->class_name; }
+        class_space(ClassFile);
         class_space(ClassFile*);
+        class_space() = default;
         ~class_space();
 
         method_info get_method(const cp_info &method_ref);
@@ -90,13 +90,16 @@ class class_space {
         field_info  get_field_info(const size_t field_idx) { return this->fields_info->at(field_idx); }
 
         
-        const ClassFile &get_class_file() { return *(this->my_classfile); }
+        const ClassFile &get_class_file() const { return *(this->my_classfile); }
 
         Field_t *get_class_field(const u2 &name_idx);
         Field_t *get_class_field(const cp_info &field_ref); // <- Talvez arrumar !!!!!!!!!!!!!!!!!!!!!
-        std::vector<cp_info> &get_const_pool() { return *(this->runtime_cp); }; // When call this function, do not alter the result!!! 
+        std::vector<cp_info> &get_const_pool() { return this->my_classfile->constant_pool; }; // When call this function, do not alter the result!!! 
 
-
+        class_space(const class_space &cp) {
+            *this = cp;
+        }
+        class class_space&operator=(const class_space& cp);
 };
 
 class method_area { // <- Arrumar
@@ -113,8 +116,8 @@ class method_area { // <- Arrumar
         method_area(const std::string &_class_path) {
             this->load_class(_class_path);
         }
-
-        ~method_area();
+        
+        ~method_area() = default;
         
         void insert_new_class(ClassFile*);
         // method_info get_method();
@@ -221,6 +224,7 @@ class heap {
 
         Object* pushRef(Object* obj_ref) {
             this->objects_list.push_back(obj_ref);
+            return this->objects_list.back();
         }
 
         std::list<Object*> &get_objects() { return this->objects_list; }

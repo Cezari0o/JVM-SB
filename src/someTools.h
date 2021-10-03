@@ -6,6 +6,8 @@
 #ifndef SOMETOOLS_H_
 #define SOMETOOLS_H_
 
+#define DEBUG_MODE 0
+
 #include <fstream>
 #include <string>
 #include <iostream>

@@ -113,6 +113,13 @@ typedef struct attribute_info {
 
     } attr;
 
+    attribute_info() = default;
+    attribute_info(const attribute_info &at) {
+        *this = at;
+    }
+
+    attribute_info &operator=(const attribute_info&attribute);
+
 } attribute_info;
 
 /**
@@ -126,6 +133,27 @@ typedef struct field_info {
     u2 descriptor_index;
     u2 attributes_count;
     attribute_info* attributes;
+    // std::vector<attribute_info> attributes;
+    
+    field_info() = default;
+    field_info(const field_info& f) {
+        *this = f;
+    }
+
+    field_info &operator=(const field_info &f) {
+        this->access_flags = f.access_flags;
+        this->name_index = f.name_index;
+        this->descriptor_index = f.descriptor_index;
+        this->attributes_count = f.attributes_count;
+
+        this->attributes = new attribute_info[this->attributes_count];
+        
+        for(u2 i = 0; i < this->attributes_count; i++) {
+            this->attributes[i] = f.attributes[i];
+        }
+
+        return *this;
+    }
 
 } field_info;
     
@@ -142,6 +170,26 @@ typedef struct method_info {
     u2 descriptor_index;
     u2 attributes_count;
     attribute_info* attributes;
+
+    method_info() = default;
+    method_info(const method_info &m) {
+        *this = m;
+    }
+
+    method_info &operator=(const method_info &m) {
+        this->access_flags = m.access_flags;
+        this->name_index = m.name_index;
+        this->descriptor_index = m.descriptor_index;
+        this->attributes_count = m.attributes_count;
+
+        this->attributes = new attribute_info[this->attributes_count];
+        
+        for(u2 i = 0; i < this->attributes_count; i++) {
+            this->attributes[i] = m.attributes[i];
+        }
+
+        return *this;
+    }
 } method_info;
 
 
@@ -221,6 +269,14 @@ typedef struct cp_info {
           u2 name_and_type_index;
       }InvokeDynamic_info;        // valor = 18
     } Const;
+
+
+    cp_info() = default;
+    cp_info(const cp_info &cp) {
+        *this = cp;
+    }
+
+    cp_info& operator=(const cp_info &cp);
 
 } cp_info;
 
@@ -326,6 +382,7 @@ void delSourceFile(attribute_info*);
 void delLineNumberTable(attribute_info*);
 void delLocalVariableTable(attribute_info*);
 
+std::initializer_list<std::string> get_attributes_name();
 
 static std::map<std::string, attr_del_func*> del_map = {
                                                         {"ConstantValue", delConstant},

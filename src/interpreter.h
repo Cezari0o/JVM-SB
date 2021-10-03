@@ -5,6 +5,8 @@
 #include "leitor.h"
 #include <string>
 
+std::string get_class_from_path(const std::string &path);
+
 class interpreter {
 
     private:

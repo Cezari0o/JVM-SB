@@ -127,6 +127,28 @@ cp_info::~cp_info()  {
         delete[] this->Const.Utf8.bytes;
 }
 
+cp_info& cp_info::operator=(const cp_info &cp) {
+
+    this->tag = cp.tag;
+
+    if(cp.tag == 1) { // UTF8_CONST_INFO = 1
+        u2 bytes_size = cp.Const.Utf8.length;
+        this->Const.Utf8.length = bytes_size;
+        this->Const.Utf8.bytes = new u1[bytes_size];
+
+
+        for(u2 i = 0; i < bytes_size; i++) {
+            this->Const.Utf8.bytes[i] = cp.Const.Utf8.bytes[i];
+        }
+    }
+
+    else {
+        this->Const = cp.Const;
+    }
+
+    return *this;
+}
+
 method_info::~method_info() {
 
     // delete[] this->attributes;
@@ -142,6 +164,80 @@ attribute_info::~attribute_info() {
     }
 
 }
+
+attribute_info &attribute_info::operator=(const attribute_info &attribute) {
+    // attr_names = {"ConstantValue,"
+                // "Code",
+                // "Exceptions",
+                // "SourceFile",
+                // "LineNumberTable",
+                // "LocalVariableTable"
+                // };
+
+
+    if(attribute.att_name == "Code") {
+        this->attr.Code.max_stack = attribute.attr.Code.max_stack;
+        this->attr.Code.max_locals = attribute.attr.Code.max_locals;
+        this->attr.Code.code_length = attribute.attr.Code.code_length;
+
+        this->attr.Code.code = new u1[this->attr.Code.code_length];
+
+        for(u4 i = 0; i < this->attr.Code.code_length; i++) {
+            this->attr.Code.code[i] = attribute.attr.Code.code[i];
+        }
+
+        this->attr.Code.exception_table_length = attribute.attr.Code.exception_table_length;
+
+        this->attr.Code.except_tb_array = new exception_table[this->attr.Code.exception_table_length];
+
+        for(u2 i = 0; i < this->attr.Code.exception_table_length; i++) {
+            this->attr.Code.except_tb_array[i] = attribute.attr.Code.except_tb_array[i];
+        }
+        
+        this->attr.Code.attributes_count = attribute.attr.Code.attributes_count;
+
+        this->attr.Code.attributes = new attribute_info[this->attr.Code.attributes_count];
+
+        for(u2 i = 0; i < this->attr.Code.attributes_count; i++) {
+            this->attr.Code.attributes[i] = attribute.attr.Code.attributes[i];
+        }
+
+    }
+
+    else if(attribute.att_name == "Exceptions") {
+        this->attr.Exceptions.number_of_exceptions = attribute.attr.Exceptions.number_of_exceptions;
+
+        this->attr.Exceptions.exception_index_table_array = new u2[this->attr.Exceptions.number_of_exceptions];
+
+        for(u2 i = 0; i < this->attr.Exceptions.number_of_exceptions; i++) {
+            this->attr.Exceptions.exception_index_table_array[i] = attribute.attr.Exceptions.exception_index_table_array[i];
+        }
+    }
+
+    else if(attribute.att_name == "LineNumberTable") {
+        this->attr.LineNumberTable.line_number_table_length = attribute.attr.LineNumberTable.line_number_table_length;
+
+        this->attr.LineNumberTable.l_num_table_array = new line_number_table[this->attr.LineNumberTable.line_number_table_length];
+
+        for(u2 i = 0; i < this->attr.LineNumberTable.line_number_table_length; i++) {
+            this->attr.LineNumberTable.l_num_table_array[i] = attribute.attr.LineNumberTable.l_num_table_array[i];
+        }
+    } else if(attribute.att_name == "LocalVariableTable") {
+        this->attr.LocalVariableTable.local_variable_table_length = attribute.attr.LocalVariableTable.local_variable_table_length;
+
+        this->attr.LocalVariableTable.lv_tb_array = new local_variable_table[this->attr.LocalVariableTable.local_variable_table_length];
+
+        for(u2 i = 0; i < this->attr.LocalVariableTable.local_variable_table_length; i++) {
+            this->attr.LocalVariableTable.lv_tb_array[i] = attribute.attr.LocalVariableTable.lv_tb_array[i];
+        }
+    } else {
+
+        this->attr = attribute.attr;
+    }
+
+    return *this;
+}
+
 
 void delConstant(attribute_info* att) {
 
@@ -173,4 +269,16 @@ void delLocalVariableTable(attribute_info* att) {
 void delSourceFile(attribute_info* att) {
 
     return;
+}
+
+
+std::initializer_list<std::string> get_attributes_name() {
+    return {"ConstantValue,"
+            "Code",
+            "Exceptions",
+            "SourceFile",
+            "LineNumberTable",
+            "LocalVariableTable"
+            };
+
 }

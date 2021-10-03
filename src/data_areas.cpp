@@ -133,6 +133,11 @@ T frame::get_top_and_pop_stack() {
 
 class_space::class_space(ClassFile* cf_ref) {
 
+
+    if(DEBUG_MODE) {
+        std::cout << "aqui\n\n";
+    }
+
     if(cf_ref == nullptr)
         throw ClassNotFoundException("A classe contem um ponteiro nulo!");
 
@@ -143,6 +148,27 @@ class_space::class_space(ClassFile* cf_ref) {
     this->methods_info = &(cf_ref->methods);
     this->fields_info = &(cf_ref->fields);
     this->class_name = getClassName(*cf_ref);
+    // Inicializar os fields da classe?
+}
+
+class_space::class_space(ClassFile cf) {
+
+    if(DEBUG_MODE) {
+        std::cout << "aqui2\n\n";
+    }
+
+    this->my_classfile = new ClassFile;
+    *(this->my_classfile) = cf;
+
+    this->runtime_cp = &(this->my_classfile->constant_pool);
+
+    this->methods_info = &(this->my_classfile->methods);
+    this->fields_info = &(this->my_classfile->fields);
+    this->class_name = getClassName(*(this->my_classfile));
+
+    if(DEBUG_MODE){
+        std::cout << "saindo de aqui2\n\n";
+    }
     // Inicializar os fields da classe?
 }
 
@@ -238,6 +264,25 @@ Field_t *class_space::get_class_field(const u2 &name_idx) {
     return this->get_class_field(field_name);
 }
 
+class_space &class_space::operator=(const class_space& cp) {
+
+    this->class_name = cp.get_class_name();
+
+    this->my_classfile = new ClassFile;
+    ClassFile toCopy = cp.get_class_file();
+    *(this->my_classfile) = toCopy;
+
+    this->runtime_cp = &(this->my_classfile->constant_pool);
+
+    for(const auto &it : cp.fields_data) {
+        this->fields_data[it.first] = new Field_t();
+        *(this->fields_data[it.first]) = *(it.second);
+    }
+
+    return *this;
+}
+
+
 // --------------------------------------------------------------------------------------------------------------------------------
 
 void method_area::insert_new_class(ClassFile *cf_ref) {
@@ -245,9 +290,17 @@ void method_area::insert_new_class(ClassFile *cf_ref) {
     if(cf_ref == nullptr)
         throw ItemNotFoundError("Area de Metodos (Insercao de nova classe):  a classe recebida nao pode ser nula!");
 
-    class_space new_class(cf_ref);
+    class_space new_class(*cf_ref);
 
+    if(DEBUG_MODE) {
+        std::cout << "olha so o nome\n";
+        std::cout << new_class.get_class_name() << "\n\n";
+    }
     classes[new_class.get_class_name()] = new_class;
+
+    if(DEBUG_MODE) {
+        std::cout << "saiu?\n\n";
+    }
 }
 
 void method_area::remove_class(const std::string &class_name) {
@@ -272,12 +325,38 @@ class_space &method_area::get_class(const std::string &class_name) {
     return classes[class_name];
 }
 
-void method_area::load_class(const std::string &class_path) {
-    bool carregado = false;
+void method_area::load_class(const std::string &cl_name) {
+    // bool carregado = false;
     char separator = '/';
+
+    std::string class_path;
+    std::string class_name;
+
+    size_t temp_num = cl_name.find_last_of(separator);
+
+    temp_num = (temp_num == std::string::npos? 0 : temp_num + 1);
+    class_name = cl_name.substr(temp_num);
+    class_name = class_name.substr(0, class_name.find_last_of('.'));
+
+    size_t dot_idx = cl_name.find_last_of('.');
+    if(dot_idx == std::string::npos) {
+        class_path = cl_name + ".class";
+        // class_name = cl_name;
+    } else {
+        class_path = cl_name;
+        // class_name = cl_name.substr(0, dot_idx);
+    }
+
+    if(DEBUG_MODE) {
+        std::cout << "Class_path: " << class_path << "\n";
+        std::cout << "Class name: " << class_name << "\n\n";
+    }
 
     if(this->is_loaded(class_path))
         return;
+
+    if(DEBUG_MODE)
+        std::cout << "Passei por is_loaded\n\n" << std::endl;
 
     ClassFile* new_class = new ClassFile;
 
@@ -289,6 +368,9 @@ void method_area::load_class(const std::string &class_path) {
         throw ClassNotFoundException(msg);
     }
 
+    if(DEBUG_MODE)
+        std::cout << "Passei pela leitura\n\n";
+
     if(not (new_class->minor_version >= 0 and new_class->major_version >= 44)) {
         delete new_class;
         throw UnsupportedClassVersionError("Versao do arquivo nao suportada");
@@ -297,28 +379,28 @@ void method_area::load_class(const std::string &class_path) {
     std::string cf_name = 
     constantToString(new_class->constant_pool.at(new_class->this_class - 1), new_class->constant_pool).front();
 
-    bool eh_o_caminho_da_classe = true; // <- Flag que indica se eh pra carregar so o nome da classe ou o caminho do arquivo todo 
+    // bool eh_o_caminho_da_classe = true; // <- Flag que indica se eh pra carregar so o nome da classe ou o caminho do arquivo todo 
     // como o nome da classe 
 
-    std::string class_name;
+    // std::string class_name;
 
-    if(eh_o_caminho_da_classe) {
-        class_name = class_path;
-    }
-    else {
-        // Obtendo o nome da classe recebida
-        size_t temp_num = class_path.find_last_of(separator);
+    // if(eh_o_caminho_da_classe) {
+    //     class_name = class_path;
+    // }
+    // else {
+    //     // Obtendo o nome da classe recebida
+    //     size_t temp_num = class_path.find_last_of(separator);
 
-        temp_num = (temp_num == std::string::npos? 0 : temp_num + 1);
-        class_name = class_path.substr(temp_num);
+    //     temp_num = (temp_num == std::string::npos? 0 : temp_num + 1);
+    //     class_name = class_path.substr(temp_num);
 
-    }
+    // }
 
-    size_t dot_idx = class_name.find_last_of('.');
+    // size_t dot_idx = class_name.find_last_of('.');
 
-    dot_idx = (dot_idx == std::string::npos? dot_idx - 1 : dot_idx + 1);
+    // dot_idx = (dot_idx == std::string::npos? dot_idx - 1 : dot_idx + 1);
 
-    class_name = class_name.substr(0, dot_idx);
+    // class_name = class_name.substr(0, dot_idx);
 
     if(class_name != cf_name) {
         std::string msg = "Classe requerida: " + class_name + "\n" +
@@ -331,29 +413,50 @@ void method_area::load_class(const std::string &class_path) {
     // passo final: carregar a classe encontrada;
     // TODO: tratar o carregamento de Arrays
 
+    if(DEBUG_MODE) 
+        std::cout << "passe aqui tambem\n\n";
+
     if(new_class->super_class != 0) {
 
         std::vector<std::string> super_class_name = constantToString(new_class->constant_pool[new_class->super_class - 1], 
         new_class->constant_pool);
 
+        if(DEBUG_MODE) {
+            std::cout << "estou carregando super classes\n\n";
+        }
+
         this->load_class(super_class_name.front());
     }
 
     else {
+        if(DEBUG_MODE) {
+            std::cout << "Comparando strings\n\n";
+            std::cout << strlen(class_name.c_str()) << " " << strlen("java/lang/Object") << "\n\n";
+        }
         if(class_name != "java/lang/Object")
             throw Exception("A classe carregada deveria ser Object, porem a classe eh " + class_name);
     }
 
     this->insert_new_class(new_class);
     this->prepare_class(class_name);
+
+    if(DEBUG_MODE)
+        std::cout << "Saiu do load_class()\n\n";
 }
 
 Array_t *get_array(std::string descriptor);
 
 void method_area::prepare_class(std::string &class_name) {
-    class_space &class_to_prepare = this->get_class(class_name);    
 
-    for(const auto &f : *(class_to_prepare.fields_info)) {
+    if(DEBUG_MODE) {
+        std::cout << "Here!!\n\n";
+    }
+    class_space &class_to_prepare = this->get_class(class_name);    
+    
+    if(DEBUG_MODE)
+        std::cout << "Is working?\n\n";
+
+    for(const auto &f : class_to_prepare.get_class_file().fields) {
         if(f.access_flags & ACCESS_FLAGS_FIELDS::ACC_STATIC) {
             
             std::string field_name = getUtf8Const(class_to_prepare.get_const_pool().at(f.name_index - 1));
@@ -372,9 +475,11 @@ void method_area::prepare_class(std::string &class_name) {
 
                 case 'F':
                     (*field) = 0.0F;
+                    break;
 
                 case 'D':
                     (*field) = 0.0;
+                    break;
 
                 case 'J':
                     (*field) = 0L;
@@ -804,4 +909,5 @@ method_info method_area::get_interface_method(class_space *calling_class, const 
 Array_t *get_array(std::string descriptor) { // Num sei o q fazer ainda
     Array_t* a;
 
+    return a;
 }
