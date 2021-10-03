@@ -1,8 +1,5 @@
 #include "data_areas.h"
 
-pc_register::pc_register() {
-    this->pc = 0;
-}
 
 int pc_register::get_pc() const {
     return this->pc;

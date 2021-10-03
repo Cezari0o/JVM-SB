@@ -8,6 +8,7 @@
 #include "leitor.h"
 #include "exibidor.h"
 #include "someTools.h"
+#include "interpreter.h"
 
 using namespace std;
 
@@ -30,10 +31,15 @@ int main(int arg_count, char* argument_vector[]) {
     // std::cout << "Digite o caminho do arquivo: ";
     // std::cin >> caminho;
 
-    caminho = arg;
-    ClassFile teste = readClassFile(caminho);
+    // caminho = arg;
+    // ClassFile teste = readClassFile(caminho);
 
-    showClassFile(teste, cout);    
+    interpreter a(caminho);
+    cout << "-----------------------------------------------------------------------------------------";
+    cout << "Arquivo executado com sucesso!";
+    cout << "-----------------------------------------------------------------------------------------\n\n";
+
+    // showClassFile(teste, cout);    
 
     return 0; //sales = vendas
 }

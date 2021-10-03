@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <ostream>
+#include <list>
 
 #include "classes.h"
 #include "any.h"
@@ -24,7 +25,7 @@ class pc_register {
 
     public:
         void set_pc(const int &v) { this->pc = v;}
-        pc_register();
+        pc_register() { this->pc = 0; };
         ~pc_register() = default;
         int get_pc() const ;
         
@@ -33,7 +34,8 @@ class pc_register {
 
         int get_next_pc(const int &);
 
-        void operator+(const int &v) { this->increment_pc(v); }
+        // void operator+(const int &v) { this->increment_pc(v); }
+        void operator+=(const int &v) { this->increment_pc(v); }
         void operator=(const int &v) { this->set_pc(v); }
         void operator=(const pc_register &pc_v) { this->set_pc(pc_v.get_pc()); }
 };
@@ -103,10 +105,10 @@ class method_area { // <- Arrumar
 
     void prepare_class(std::string &class_name);
     bool is_sub_class(class_space &some_class, class_space &super_class);
-    class_space &get_class(const std::string &class_name); // <- Apenas recupera a classe, sem verificar flags de acesso
-
 
     public:
+    
+        class_space &get_class(const std::string &class_name); // <- Apenas recupera a classe, sem verificar flags de acesso
         method_area() = default;
         method_area(const std::string &_class_path) {
             this->load_class(_class_path);
@@ -200,6 +202,30 @@ class frame {
 
 };
 
+
+class heap {
+
+    private:
+        std::list<Object*> objects_list;
+
+    public:
+
+        heap() = default;
+
+        ~heap() { 
+            
+            for(auto it = this->objects_list.begin(); it != this->objects_list.end(); it++)
+                delete (*it);
+
+        }
+
+        Object* pushRef(Object* obj_ref) {
+            this->objects_list.push_back(obj_ref);
+        }
+
+        std::list<Object*> &get_objects() { return this->objects_list; }
+
+};
 
 
 #endif

@@ -13,10 +13,18 @@ class Object {
     std::string class_name;
     std::string my_name; // <- ???
     std::map<std::string, class Field_t*> my_fields;
+    Any single_value; // <- Para uso por outros tipos de classes, como Arrays por exemplo
 
     public:
 
+    template<class T>
+    T &get_value() { return single_value.as<T>(); };
+
     Object(const std::string &class_name) { this->class_name = class_name; }
+    Object(const std::string &class_name, Any value) {
+        this->single_value = value;
+        this->class_name = class_name;
+    }
     Object();
     
     ~Object() {
@@ -24,6 +32,9 @@ class Object {
             delete it.second;
         }
 
+        if(single_value.is<Array_t*>()) {
+            delete single_value.as<Array_t*>();
+        }
     };
 
     std::string get_class_name() { return this->class_name; }
