@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <vector>
 #include <utility>
 #include "leitor.h"
 #include "classes.h"

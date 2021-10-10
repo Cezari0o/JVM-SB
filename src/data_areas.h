@@ -45,7 +45,7 @@ class jvm_stack {
     class frame* top_frame = nullptr;
 
     size_t stack_size = 0;
-    static const size_t max_stack_size = 1e5;
+    static const size_t max_stack_size = 1e4;
 
     public:
 
@@ -69,6 +69,20 @@ class class_space {
 
         
     public:
+        int count_objects = 0;
+
+
+        int get_num_of_instance(bool to_increment = true) { 
+            
+            if(to_increment) {
+                return this->count_objects++ % ((1 << 31) - 2);
+            }
+        
+            else {
+                return this->count_objects;
+            }
+        }
+
         std::map<std::string, Field_t*> fields_data; // <- Contem os fields estaticos
 
         const std::vector<method_info> *methods_info;
@@ -109,6 +123,8 @@ class method_area { // <- Arrumar
     void prepare_class(std::string &class_name);
     bool is_sub_class(class_space &some_class, class_space &super_class);
 
+    // friend class interpreter;
+
     public:
     
         class_space &get_class(const std::string &class_name); // <- Apenas recupera a classe, sem verificar flags de acesso
@@ -116,7 +132,9 @@ class method_area { // <- Arrumar
         method_area(const std::string &_class_path) {
             this->load_class(_class_path);
         }
-        
+
+        const method_info &get_method(const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
+
         ~method_area() = default;
         
         void insert_new_class(ClassFile*);
@@ -160,17 +178,18 @@ class frame {
 
     private:
         class frame *next_frame = nullptr;
-        class class_space* cs_ref;
-        std::vector<cp_info> *cp_ref;
 
         size_t max_locals;
         size_t max_stack;
 
         size_t stack_real_size = 0;
-        std::stack<Any> operand_stack;
-        std::vector<Any> local_vars; // <- Arrumar para considerar operacoes utilizando longs e doubles
 
     public:
+        std::stack<Any> operand_stack;
+        std::vector<Any> local_vars; // <- Arrumar para considerar operacoes utilizando longs e doubles
+        
+        class class_space* cs_ref;
+        std::vector<cp_info> *cp_ref;
 
         template<class T>
         T &get_local_var(size_t idx) {
@@ -182,8 +201,7 @@ class frame {
 
         void pop_stack();
 
-        template<class T>
-        T &top_stack() { return this->operand_stack.top().as<T>(); };
+        Any &top_stack() { return this->operand_stack.top(); };
 
         template<class T>
         T get_top_and_pop_stack();

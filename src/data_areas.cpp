@@ -86,8 +86,12 @@ void frame::push_stack(const T &v) {
 
     Any value(v);
 
-    if(this->stack_real_size + 1 == this->max_stack)
-        throw Exception("Max operand stack size reached!");
+    while(value.is<Any>()) {
+        value = value.as<Any>();
+    }
+
+    // if(this->stack_real_size + 1 == this->max_stack)  // Tem q verificar, talvez
+    //     throw Exception("Max operand stack size reached!");
 
 
     if(value.is<long long>() or value.is<double>()) {
@@ -121,7 +125,7 @@ void frame::pop_stack() {
 
 template<class T>
 T frame::get_top_and_pop_stack() {
-    T toReturn = this->top_stack<T>();
+    T toReturn = this->top_stack().as<T>();
 
     this->pop_stack();
 
@@ -148,6 +152,7 @@ class_space::class_space(ClassFile* cf_ref) {
     this->methods_info = &(cf_ref->methods);
     this->fields_info = &(cf_ref->fields);
     this->class_name = getClassName(*cf_ref);
+    this->count_objects = 0;
     // Inicializar os fields da classe?
 }
 
@@ -165,6 +170,8 @@ class_space::class_space(ClassFile cf) {
     this->methods_info = &(this->my_classfile->methods);
     this->fields_info = &(this->my_classfile->fields);
     this->class_name = getClassName(*(this->my_classfile));
+    this->count_objects = 0;
+
 
     if(DEBUG_MODE){
         std::cout << "saindo de aqui2\n\n";
@@ -645,6 +652,8 @@ Field_t &method_area::get_class_field(class_space *calling_class, const std::str
         }
     }
 
+
+    throw ItemNotFoundError("Tem que arrumar este metodo pra procurar interfaces. Ctrl + shift + F e procura TEMQUEARRUMARDISGRAMA");
 
     // fazer a procura do field nas superinterfaces diretas da classe
     if(!found_field) {

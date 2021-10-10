@@ -5,19 +5,22 @@
 #include <sstream>
 #include <vector>
 #include "any.h"
+#include "descript_types.h"
 #include "except.h"
 
 class Array_t {
 
     private:
-        std::vector<Any> my_data;
         int my_type;
+        size_t array_size = 0;
 
     public:
+        std::vector<Any> my_data;
 
-        Array_t(int type) { this->my_type = type; }
+        Array_t() = default;
+        Array_t(int size) { this->my_data.resize(size); }
 
-        Array_t(int type, size_t size) { 
+        Array_t(size_t size, int type) { 
             this->my_type = type;
             my_data.resize(size);     
         }
@@ -76,7 +79,8 @@ class Object {
     std::string class_name;
     std::string my_name; // <- ???
     std::map<std::string, class Field_t*> my_fields;
-    Any single_value; // <- Para uso por outros tipos de classes, como Arrays por exemplo
+
+    int type;
 
     // template<class T>
     // void delete_field(Field_t* field) {
@@ -85,6 +89,8 @@ class Object {
     // }
 
     public:
+    Any single_value; // <- Para uso por outros tipos de classes, como Arrays por exemplo
+    int my_number;
 
     template<class T>
     T &get_value() { return single_value.as<T>(); };
@@ -94,8 +100,15 @@ class Object {
         this->single_value = value;
         this->class_name = class_name;
     }
+
+    Object(const std::string &class_name, Any value, bool type): Object(class_name, value) {
+        this->type = type;       
+    }
     Object();
     
+    int get_type() { return type; }
+    void set_type(int type) { this->type = type; }
+
     ~Object() {
 
         // for_each(this->my_fields.begin(), this->my_fields.end(), 

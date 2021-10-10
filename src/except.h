@@ -101,4 +101,16 @@ class IncompatibleClassChangeError: public Exception {
         IncompatibleClassChangeError(const std::string &msg) : Exception(msg) {}
 };
 
+class NullPointerException: public Exception {
+    public:
+        std::string get_exception_name() const override { return "NullPointerException"; }
+        NullPointerException(const std::string &msg) : Exception(msg) {} 
+};
+
+class ArrayIndexOutOfBoundsException: public Exception {
+    public:
+        std::string get_exception_name() const override { return "ArrayIndexOutOfBoundsException"; }
+        ArrayIndexOutOfBoundsException(const std::string &msg) : Exception(msg) {} 
+};
+
 #endif
