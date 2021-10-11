@@ -27,7 +27,7 @@ std::string getArrayType(u1 n_type) {
 std::string getStringOpcode(const u1 &opcode, const std::vector<cp_info> &cp) {
     std::vector<std::pair<u2, std::string>> mnemonicos = init_opcode_list();
 
-    for(int i = 0; i < mnemonicos.size(); i++) {
+    for(size_t i = 0; i < mnemonicos.size(); i++) {
         if(mnemonicos.at(i).first == opcode) {
             return mnemonicos.at(i).second;
         }
@@ -288,8 +288,10 @@ std::vector<std::string> constantToString(const cp_info &cinfo, const vector<cp_
             }
             
             else {
-                buffer .push_back( constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true).front() + ": " +
-                constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true).front() ); 
+                buffer .push_back( constantToString(cp[cinfo.Const.NameAndType_info.name_index - 1], cp, true).front() );
+                buffer.push_back(
+                constantToString(cp[cinfo.Const.NameAndType_info.descriptor_index - 1], cp, true).front() 
+                                ); 
             }
             
             break;
@@ -465,7 +467,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         
         auto constInfoStr = constantToString(cf.constant_pool[bytecode[idx + 1] - 1], cf.constant_pool, true);
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " )\n" : ", ");
         }
 
@@ -478,7 +480,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         buffer_str << "( ";
         auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " )\n" : ", ");
         }
 
@@ -486,14 +488,14 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     }
 
 
-    else if(opcode >= 21 and opcode <= 25 or opcode >= 54 and opcode <= 58) { // *load and *store
+    else if((opcode >= 21 and opcode <= 25) or (opcode >= 54 and opcode <= 58)) { // *load and *store
         int idx_value = bytecode[idx + 1];
 
         buffer_str << getEmbracers(idx_value);
         quant_bytes = 2;
     }
 
-    else if(opcode >= 26 and opcode <= 53 or opcode >= 59 and opcode <= 86) { // *load_<n> and *store_<n>
+    else if((opcode >= 26 and opcode <= 53) or (opcode >= 59 and opcode <= 86)) { // *load_<n> and *store_<n>
 
         quant_bytes = 1;
     }
@@ -579,13 +581,13 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
             showExcept("A tableswitch no byte em " + std::to_string(fidx) + " possui highbytes < lowbytes.");
 
         std::vector<int> offsets(total_offsets);
-        for(int it = 0; it < offsets.size(); it++) {
+        for(size_t it = 0; it < offsets.size(); it++) {
             offsets.at(it) = (bytecode[idx] << 24) | (bytecode[idx + 1] << 16) | (bytecode[idx + 2] << 8) | bytecode[idx + 3];
             idx += 4;
         }
 
         buffer_str << 0 << " to " << offsets.size() - 1 << "\n";
-        for(int it = 0; it < offsets.size(); it++) {
+        for(size_t it = 0; it < offsets.size(); it++) {
             buffer_str << getTabs(1 + tabs_count) << it << ":\t" << fidx + offsets[it];
             
             buffer_str.setf(std::ios::showpos);
@@ -613,11 +615,11 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         idx += 4;
 
         // std::cout << total_offsets << " " << idx << "\n";
-        if(npairs_b < 1)
+        if(npairs_b < 0)
             showExcept("A lookupswitch no byte em " + std::to_string(fidx) + " possui npairs < 0.");
 
-        vector<std::pair<int, int>> pairs(npairs_b);
-        for(int it = 0; it < pairs.size(); it++) {
+        std::vector<std::pair<int, int>> pairs(npairs_b);
+        for(size_t it = 0; it < pairs.size(); it++) {
             pairs.at(it).first = (bytecode[idx] << 24) | (bytecode[idx + 1] << 16) | (bytecode[idx + 2] << 8) | bytecode[idx + 3];
             idx += 4;
             pairs.at(it).second = (bytecode[idx] << 24) | (bytecode[idx + 1] << 16) | (bytecode[idx + 2] << 8) | bytecode[idx + 3];
@@ -654,7 +656,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
 
         auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
         quant_bytes = 3;
@@ -666,7 +668,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     
         auto constInfoStr = constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true);
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -679,7 +681,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     
         auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -691,7 +693,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     
         auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -710,7 +712,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     
         auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -726,7 +728,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
     
         auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
 
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -757,7 +759,7 @@ std::pair<int, std::string> getInstructToPrint(const u1 &opcode, size_t idx, u1*
         int idx_value = (bytecode[idx + 1] << 8) | bytecode[idx + 2];
     
         auto constInfoStr = (constantToString(cf.constant_pool[idx_value - 1], cf.constant_pool, true));
-        for(int i = 0; i < constInfoStr.size(); i++) {
+        for(size_t i = 0; i < constInfoStr.size(); i++) {
             buffer_str << constInfoStr[i] << (i == constInfoStr.size() - 1? " \n" : ", ");
         }
 
@@ -813,7 +815,7 @@ std::string getClassName(const ClassFile &cf) {
     std::string class_name;
 
     if(cf.this_class == 0)
-        return "Object";
+        return "java/lang/Object";
 
     auto cp = cf.constant_pool;
 

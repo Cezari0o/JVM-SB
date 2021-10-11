@@ -79,7 +79,7 @@ double getDoubleVal(const cp_info &const_info)
     if(bits == 0xfff0000000000000L)
         return - INFINITY;// infinito negativo 
 
-    if(bits >= 0x7ff0000000000001L and bits <= 0x7fffffffffffffffL or bits >= 0xfff0000000000001L and bits <= 0xffffffffffffffffL)
+    if((bits >= 0x7ff0000000000001L and bits <= 0x7fffffffffffffffL) or (bits >= 0xfff0000000000001L and bits <= 0xffffffffffffffffL))
         return nan(""); //NaN
 
 
@@ -108,7 +108,7 @@ float getFloatVal(const cp_info &const_info)
     if(bits == 0xff800000)
         return -INFINITY;// infinito negativo 
 
-    if(bits >= 0x7f800001 and bits <= 0x7fffffff or bits >= 0xff800001 and bits <= 0xffffffff)
+    if((bits >= 0x7f800001 and bits <= 0x7fffffff) or (bits >= 0xff800001 and bits <= 0xffffffff))
         return nanf(""); //NaN
 
     int s = ((bits >> 31) == 0) ? 1 : -1;
@@ -173,7 +173,9 @@ attribute_info &attribute_info::operator=(const attribute_info &attribute) {
                 // "LineNumberTable",
                 // "LocalVariableTable"
                 // };
-
+    this->att_name = attribute.att_name;
+    this->att_length = attribute.att_length;
+    this->att_name_idx = attribute.att_name_idx;
 
     if(attribute.att_name == "Code") {
         this->attr.Code.max_stack = attribute.attr.Code.max_stack;

@@ -10,7 +10,7 @@ std::string getToShowAccessFlagsStrings(u2 flags, int type) {
 
     std::vector<std::string> flags_acesso = getAccessFlagString(flags, type);
     buffer_str << " ["; 
-    for(int i = 0; i < flags_acesso.size(); i++) {
+    for(size_t i = 0; i < flags_acesso.size(); i++) {
         auto f = flags_acesso[i];
         buffer_str << f << (i == flags_acesso.size() - 1? "" : ", ");
     }
@@ -106,7 +106,7 @@ void printCode(const attribute_info &att, const std::vector<cp_info> &cp, std::o
 
     outstream.setf(ios_base::internal, ios_base::adjustfield);
     int bytes_len = 0;
-    for(int i = 0; i < att.attr.Code.code_length; i += bytes_len) {
+    for(u4 i = 0; i < att.attr.Code.code_length; i += bytes_len) {
         // outstream << getTabs(2) << (unsigned int) i << " " << 
         // getStringOpcode(att.attr.Code.code[i], cp) << endl;
 

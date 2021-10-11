@@ -75,7 +75,7 @@ class class_space {
         int get_num_of_instance(bool to_increment = true) { 
             
             if(to_increment) {
-                return this->count_objects++ % ((1 << 31) - 2);
+                return this->count_objects++ % ((1 << 30));
             }
         
             else {
@@ -89,7 +89,7 @@ class class_space {
         const std::vector<field_info>  *fields_info;
 
         Field_t *get_class_field(const std::string &name);
-        method_info get_method(const std::string &name, const std::string &descriptor) ;
+        method_info &get_method(const std::string &name, const std::string &descriptor) ;
         method_info get_method(const u2 &name_idx, const u2 &descriptor_idx) ;
 
         std::string get_class_name() const { return this->class_name; }
@@ -141,8 +141,8 @@ class method_area { // <- Arrumar
         // method_info get_method();
         void remove_class(const std::string& class_name);
 
-        template<class T>
-        T &get_item(const cp_info &ref_item); // <-- provisorio (ainda nao implementado)
+        // template<class T>
+        // T &get_item(const cp_info &ref_item); // <-- provisorio (ainda nao implementado)
 
 
         class_space &get_class(class_space* calling_class, const std::string &class_name); // <-- Carrega a classe se ela ainda nao ta na area de metodos
@@ -151,7 +151,9 @@ class method_area { // <- Arrumar
         //              |
         // Talvez arrumar para considerar arrays!!!
 
-        Field_t &get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type);
+        Field_t &get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type, bool from_object = false);
+
+        void get_fields_from_obj(class_space *calling_class, const std::string &class_name, std::vector<std::pair<std::string, Field_t*>> &to_return_fields);
 
         method_info get_class_method(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
 
@@ -197,14 +199,41 @@ class frame {
         }
         
         template<class T>
-        void push_stack(const T &);
+        void push_stack(const T &v) {
+
+            Any value(v);
+
+            while(value.is<Any>()) {
+                value = value.as<Any>();
+            }
+
+            // if(this->stack_real_size + 1 == this->max_stack)  // Tem q verificar, talvez
+            //     throw Exception("Max operand stack size reached!");
+
+
+            if(value.is<long long>() or value.is<double>()) {
+                this->stack_real_size += 2;
+            }
+
+            else {
+                this->stack_real_size++;
+            }
+
+            this->operand_stack.push(value);
+        }
 
         void pop_stack();
 
         Any &top_stack() { return this->operand_stack.top(); };
 
         template<class T>
-        T get_top_and_pop_stack();
+        T get_top_and_pop_stack() {
+            T toReturn = this->top_stack().as<T>();
+        
+            this->pop_stack();
+        
+            return toReturn;
+        }
 
         size_t size_stack() { return this->stack_real_size; }
         size_t max_size_stack() { return this->max_stack; }

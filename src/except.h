@@ -113,4 +113,10 @@ class ArrayIndexOutOfBoundsException: public Exception {
         ArrayIndexOutOfBoundsException(const std::string &msg) : Exception(msg) {} 
 };
 
+class NegativeArraySizeException: public Exception {
+    public:
+        std::string get_exception_name() const override { return "NegativeArraySizeException"; }
+        NegativeArraySizeException(const std::string &msg) : Exception(msg) {}
+};
+
 #endif

@@ -81,29 +81,29 @@ frame::frame(const attribute_info& code, class_space* class_ref, frame* next_fra
 : frame(code.attr.Code.max_stack, code.attr.Code.max_locals, class_ref, next_frame) {}
 
 
-template<class T>
-void frame::push_stack(const T &v) {
+// template<class T>
+// void frame::push_stack(const T &v) {
 
-    Any value(v);
+//     Any value(v);
 
-    while(value.is<Any>()) {
-        value = value.as<Any>();
-    }
+//     while(value.is<Any>()) {
+//         value = value.as<Any>();
+//     }
 
-    // if(this->stack_real_size + 1 == this->max_stack)  // Tem q verificar, talvez
-    //     throw Exception("Max operand stack size reached!");
+//     // if(this->stack_real_size + 1 == this->max_stack)  // Tem q verificar, talvez
+//     //     throw Exception("Max operand stack size reached!");
 
 
-    if(value.is<long long>() or value.is<double>()) {
-        this->stack_real_size += 2;
-    }
+//     if(value.is<long long>() or value.is<double>()) {
+//         this->stack_real_size += 2;
+//     }
 
-    else {
-        this->stack_real_size++;
-    }
+//     else {
+//         this->stack_real_size++;
+//     }
 
-    this->operand_stack.push(value);
-}
+//     this->operand_stack.push(value);
+// }
 
 void frame::pop_stack() {
     int temp;
@@ -123,14 +123,14 @@ void frame::pop_stack() {
     this->operand_stack.pop();
 }
 
-template<class T>
-T frame::get_top_and_pop_stack() {
-    T toReturn = this->top_stack().as<T>();
+// template<class T>
+// T frame::get_top_and_pop_stack() {
+//     T toReturn = this->top_stack().as<T>();
 
-    this->pop_stack();
+//     this->pop_stack();
 
-    return toReturn;
-}
+//     return toReturn;
+// }
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
@@ -188,25 +188,26 @@ class_space::~class_space() {
     }
 }
 
-method_info class_space::get_method(const std::string &name, const std::string &descriptor) {
+method_info &class_space::get_method(const std::string &name, const std::string &descriptor) {
     std::vector<method_info> *class_methods;
 
-    method_info to_return_m;
+    method_info *to_return_m;
     class_methods = &(this->my_classfile->methods);
 
-    for(const method_info &m : *class_methods) {
+    for(method_info &m : *class_methods) {
         std::string m_name = getUtf8Const(this->runtime_cp->at(m.name_index - 1));
         std::string m_descript = getUtf8Const(this->runtime_cp->at(m.descriptor_index - 1));
         
         if((m_name == name) and (m_descript == descriptor)) {
-            return to_return_m = m;
+            to_return_m = &m;
+            return m;
         }
     }
 
     throw ItemNotFoundError("Metodo nao encontrado!\nClasse: " + this->class_name +
     "Metodo: " + name + "\nDescritor: " + descriptor);
 
-    return to_return_m;
+    return *to_return_m;
 }
 
 method_info class_space::get_method(const u2 &name_idx, const u2 &descriptor_idx) {
@@ -256,7 +257,8 @@ Field_t *class_space::get_class_field(const std::string &field_name) {
 
 Field_t *class_space::get_class_field(const cp_info &field_ref) {
     cp_info name_and_type = this->runtime_cp->at(field_ref.Const.Fieldref_info.name_and_type_index);
-    u2 name_idx, descript_idx;
+    u2 name_idx;
+    // u2 descript_idx;
 
     name_idx = name_and_type.Const.NameAndType_info.name_index;
     
@@ -463,6 +465,8 @@ void method_area::prepare_class(std::string &class_name) {
     if(DEBUG_MODE)
         std::cout << "Is working?\n\n";
 
+    Object* new_ref = nullptr;
+
     for(const auto &f : class_to_prepare.get_class_file().fields) {
         if(f.access_flags & ACCESS_FLAGS_FIELDS::ACC_STATIC) {
             
@@ -496,7 +500,9 @@ void method_area::prepare_class(std::string &class_name) {
                     descriptor = descriptor.substr(1);
                     descriptor.pop_back();
 
-                    (*field) = Object(descriptor);
+                    new_ref =  new Object(descriptor);
+                    new_ref->set_type(FIELD_TYPES::CLASS_REF_TYPE);
+                    (*field) = new_ref;
                     break;
 
                 case '[':
@@ -527,7 +533,7 @@ class_space &method_area::get_class(class_space *calling_class, const std::strin
         throw Exception(buffer.str());
     }
     
-    u2 flags_calling_class  = calling_class->get_class_file().access_flags;
+    // u2 flags_calling_class  = calling_class->get_class_file().access_flags;
     u2 flags_required_class = required_class->get_class_file().access_flags;
 
     if(!(flags_required_class & ACCESS_FLAGS_CLASS_FILE::ACC_PUBLIC)) {
@@ -567,7 +573,7 @@ bool method_area::is_sub_class(class_space &some_class, class_space &super_class
     }
 }
 
-Field_t &method_area::get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type) {
+Field_t &method_area::get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type, bool from_object) {
     stringstream buffer; // Buffer para armazenar mensagem de erro, caso aconteca
     buffer << "(Area de metodos) Erro em adquirir o field da classe!\n";
     buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
@@ -642,18 +648,18 @@ Field_t &method_area::get_class_field(class_space *calling_class, const std::str
                 }
             }
 
-            else {
-                buffer << "O field encontrado nao possui flags de acesso validas!\n";
+            // else {
+            //     buffer << "O field encontrado nao possui flags de acesso validas!\n";
 
-                throw Linkage_Error_Exception(buffer.str());
-            }
+            //     throw Linkage_Error_Exception(buffer.str());
+            // }
 
             break;
         }
     }
 
 
-    throw ItemNotFoundError("Tem que arrumar este metodo pra procurar interfaces. Ctrl + shift + F e procura TEMQUEARRUMARDISGRAMA");
+    // throw ItemNotFoundError("Tem que arrumar este metodo pra procurar interfaces. Ctrl + shift + F e procura TEMQUEARRUMARDISGRAMA");
 
     // fazer a procura do field nas superinterfaces diretas da classe
     if(!found_field) {
@@ -674,6 +680,101 @@ Field_t &method_area::get_class_field(class_space *calling_class, const std::str
 
     return *class_field;
     
+}
+
+void init_field(const std::string &field_name, std::string field_descriptor, Field_t* field_data) {
+
+    Object* new_ref = nullptr;
+
+    switch(field_descriptor.front()) {
+        case 'B':
+        case 'C':
+        case 'I':
+        case 'S':
+        case 'Z':
+            (*field_data) = 0;
+            break;
+
+        case 'F':
+            (*field_data) = 0.0F;
+            break;
+
+        case 'D':
+            (*field_data) = 0.0;
+            break;
+
+        case 'J':
+            (*field_data) = 0L;
+            break;
+
+        case 'L':
+            field_descriptor = field_descriptor.substr(1);
+            field_descriptor.pop_back();
+
+            new_ref = new Object(field_descriptor);
+            new_ref->set_type(FIELD_TYPES::CLASS_REF_TYPE);
+            (*field_data) = new_ref;
+            break;
+
+        case '[':
+            (*field_data) = get_array(field_descriptor);
+            break;
+    }
+
+}
+
+void method_area::get_fields_from_obj(class_space *calling_class, const std::string &class_name, std::vector<std::pair<std::string, Field_t*>> &to_return_fields) {
+   
+    stringstream buffer; // Buffer para armazenar mensagem de erro, caso aconteca
+    buffer << "(Area de metodos) Erro em adquirir os fields de objeto!\n";
+    buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+    buffer << "Classe requerida: " << class_name << "\n";
+
+    class_space *required_class;
+
+    try {
+        required_class = &(this->get_class(calling_class, class_name));
+
+    } catch(const Exception &e) {
+        buffer << "Erro: " << e.get_exception_name() << "\n";
+        buffer << "Erro ao carregar classe: " << e.what() << "\n";
+        throw Linkage_Error_Exception(buffer.str());
+    }
+
+    auto &cf_required = required_class->get_class_file();
+
+    Field_t *class_field = nullptr;
+
+    for(auto &f : cf_required.fields) {
+        std::string f_name, f_descriptor;
+        f_name       = getUtf8Const(cf_required.constant_pool.at(f.name_index - 1));
+        f_descriptor = getUtf8Const(cf_required.constant_pool.at(f.descriptor_index - 1));
+            
+        if(not (f.access_flags & ACCESS_FLAGS_FIELDS::ACC_STATIC)) {
+
+            class_field = new Field_t();
+
+            init_field(f_name, f_descriptor, class_field);
+            to_return_fields.push_back(make_pair(f_name, class_field));
+        }
+    }
+
+    for(auto &interface_idx : required_class->get_class_file().interfaces) {
+        std::string super_interface_name = constantToString(
+            cf_required.constant_pool.at(interface_idx - 1), cf_required.constant_pool).front();
+
+        this->get_fields_from_obj(calling_class, super_interface_name, to_return_fields);
+    }
+
+    if(cf_required.super_class != 0) {
+
+        std::string super_class_name = constantToString(
+            cf_required.constant_pool.at(cf_required.super_class - 1), cf_required.constant_pool).front();
+
+        this->get_fields_from_obj(calling_class, super_class_name, to_return_fields);
+    }
+
+
 }
 
 method_info method_area::get_class_method(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string> &name_and_type) {
@@ -784,11 +885,11 @@ method_info method_area::get_class_method(class_space *calling_class, const std:
             }
         }
 
-        else {
-            buffer << "O metodo encontrado nao possui flags de acesso validas!\n";
+        // else {
+        //     buffer << "O metodo encontrado nao possui flags de acesso validas!\n";
 
-            throw Linkage_Error_Exception(buffer.str());
-        }
+        //     throw Linkage_Error_Exception(buffer.str());
+        // }
         
     }
 
@@ -913,6 +1014,23 @@ method_info method_area::get_interface_method(class_space *calling_class, const 
     }
 
     return required_method;
+}
+
+const method_info &method_area::get_method(const std::string &class_name, const std::pair<std::string, std::string> &name_and_type) {
+
+    class_space *required_class;
+
+    try {
+        required_class = &(this->get_class(class_name));
+    } catch(const Exception &e) {
+        stringstream buffer;
+        buffer << "Erro ao carregar classe\n";
+        buffer << e.what() << "\n";
+
+        throw Linkage_Error_Exception(buffer.str());
+    }
+
+    return required_class->get_method(name_and_type.first, name_and_type.second);
 }
 
 Array_t *get_array(std::string descriptor) { // Num sei o q fazer ainda

@@ -18,7 +18,6 @@ int main(int arg_count, char* argument_vector[]) {
     string caminho;
     vector<string> arguments(arg_count);
 
-
     if(arg_count > 3) {
         string msg = "Numero de argumentos invalido\n";
         msg += "Digite --help para obter ajuda.\n";
@@ -63,7 +62,9 @@ int main(int arg_count, char* argument_vector[]) {
             cout << "Seu caminho:" << caminho << "\n\n";
         }
 
-        interpreter a(caminho);
+        execution_engine* exec_eng = new execution_engine(caminho);
+
+        exec_eng->run();
         cout << "\n\n-----------------------------------------------------------------------------------------";
         cout << "--------------------------- Arquivo executado com sucesso! -----------------------------\n";
         cout << "-----------------------------------------------------------------------------------------\n\n";

@@ -78,9 +78,10 @@ class Object {
     private:
     std::string class_name;
     std::string my_name; // <- ???
-    std::map<std::string, class Field_t*> my_fields;
-
     int type;
+
+    public:
+    std::map<std::string, class Field_t*> my_fields;
 
     // template<class T>
     // void delete_field(Field_t* field) {
@@ -88,7 +89,6 @@ class Object {
     //     h.~Any
     // }
 
-    public:
     Any single_value; // <- Para uso por outros tipos de classes, como Arrays por exemplo
     int my_number;
 
@@ -104,7 +104,7 @@ class Object {
     Object(const std::string &class_name, Any value, bool type): Object(class_name, value) {
         this->type = type;       
     }
-    Object();
+    Object() = default;
     
     int get_type() { return type; }
     void set_type(int type) { this->type = type; }
