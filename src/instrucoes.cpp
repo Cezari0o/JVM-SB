@@ -32,6 +32,8 @@ int type_store_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fr
 
 }
 
+
+
 template<class T>
 int type_const_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, T VALOR_CONST) {
@@ -197,6 +199,16 @@ int type_return_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
 // ------------------------------------------------------------------------------------------------------------------------
 // Funcoes auxiliares
 
+/**
+ * is_cat2.
+ *
+ * @author	Unknown
+ * @since	v0.0.1
+ * @version	v1.0.0	Tuesday, October 12th, 2021.
+ * @global
+ * @param	any	&v	
+ * @return	mixed
+ */
 bool is_cat2(const Any &v) {
 
     return v.is<long>() or v.is<double>();
@@ -210,13 +222,38 @@ bool is_cat1(const Any &v) {
 
 // ------------------------------------------------------------------------------------------------------------------------
 // -- Instrucoes --
-
+/**
+ * @brief 
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ */
 int nop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return 1;
 }
 
+/**
+ * @brief 
+ * Retira do topo o valor na pilha de operando.
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ */
 int pop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
 
@@ -224,6 +261,8 @@ int pop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
 
     return 1;            
 }
+
+
 
 int pop2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -2377,10 +2416,13 @@ int new_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
         the_new_obj->add_field(it.first, it.second);
     }
 
-    // Eh necessario executar o metodo <init> desta classe!!!
+    std::vector<Any> args = {the_new_obj};
+
+    interpreter* the_interpreter = interpreter::get_instance();
+    // the_interpreter->init_object();
+
     heap_area->pushRef(the_new_obj);
     my_frame->push_stack(the_new_obj);
-
 
     return 3;
 }
@@ -2723,6 +2765,7 @@ void interpreter::execute_method(const std::string &class_name, const method_inf
     bool end_execution = false;
 
     pc_register pc; pc = 0;
+    int next_pc;
     while(((size_t ) pc.get_pc()) < code_data->attr.Code.code_length and (not end_execution)) {
         //instrucao pah;
         //pah = alguma coisa;
@@ -2741,9 +2784,22 @@ void interpreter::execute_method(const std::string &class_name, const method_inf
             continue;
         }
 
+
+        try {
+            next_pc = next_instruction(this->my_method_area, this->my_heap, this->my_java_stack, &this->my_java_stack->top(),
+                    code_data->attr.Code.code, pc.get_pc(), false, end_execution);
+        } catch(const Exception &e) {
+            this->show_error(e);
+            exit(EXIT_FAILURE);
+        } catch(const std::exception &e) {
+
+            std::cerr << "Erro desconhecido!";
+            std::cerr << "Erro: " << e.what() << "\n";
+            std::cerr << "Terminando o programa!";
+            delete this;
+            exit(EXIT_FAILURE);
+        }
         // Executa a instrucao
-        int next_pc = next_instruction(this->my_method_area, this->my_heap, this->my_java_stack, &this->my_java_stack->top(),
-                code_data->attr.Code.code, pc.get_pc(), false, end_execution);
         
         // Tem q arrumar!!!
         // if(next_op >= 167 and next_op <= 177) {
@@ -2822,4 +2878,21 @@ void interpreter::init_class(const std::string &class_name) {
 
     std::vector<Any> args;
     this->execute_method(class_name, *class_initializer, args);    
+}
+
+void interpreter::init_obj(const std::string &class_name, Object* new_obj) {
+    const method_info* class_initializer;
+
+    try {
+        class_initializer = &(this->my_method_area->get_method(class_name, {"<init>", "()V"}));
+
+    } catch(const Exception &e) {
+        stringstream buffer;
+        buffer << "Metodo de inicializacao nao encontrado!\n";
+        buffer << "Nome da classe: " << class_name << "\n";
+    }
+
+    std::vector<Any> args = {new_obj};
+    this->execute_method(class_name, *class_initializer, args);
+
 }

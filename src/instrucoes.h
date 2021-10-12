@@ -22,7 +22,7 @@ typedef struct interpreter {
             std::cerr << "Erro na execucao!\n";
             std::cerr << "Excecao encontrada: " << e.get_exception_name() << "\n";
             std::cerr << "Erro: " << e.what() << "\n";
-            std::cerr << "Terminando a execucao do programa!";
+            std::cerr << "Terminando a execucao do programa!\n";
 
             this->~interpreter();
     };
@@ -34,6 +34,7 @@ typedef struct interpreter {
 
     public:
     // fazer metodo para iniciar objetos!!
+    void init_obj(const std::string &class_name, Object* new_obj);
     void init_class(const std::string &class_name);
     std::map<std::string, bool> initialized_classes;
 
