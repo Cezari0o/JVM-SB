@@ -1,6 +1,19 @@
+/*!
+* \file \src\str_func.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef STR_FUNC_H_
 #define STR_FUNC_H_
 
+/*! Importation of librairies*/
 #include <string>
 #include <sstream>
 #include <map>
@@ -10,8 +23,20 @@
 #include "classes.h"
 #include "someTools.h"
 
+/*!
+* \def CLASS_FILE_TYPE
+* Description
+*/
 #define CLASS_FILE_TYPE 0
+/*!
+* \def FIELD_TYPE
+* Description
+*/
 #define FIELD_TYPE 1
+/*!
+* \def METHOD_TYPE
+* Description
+*/
 #define METHOD_TYPE 2
 
 std::vector<std::string> getAccessFlagString(u2 flags, int type);

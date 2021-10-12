@@ -7,6 +7,20 @@ interpreter* interpreter::the_interpreter = nullptr;
 // ------------------------------------------------------------------------------------------------------------------------
 // Templates
 
+/**
+ * @brief template que remove valores da pilha de operandos e coloca no local_var de acordo com o valor index
+ * que e calculado no proprio template
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @return int 
+ * @sa get_top_and_pop_stack(), get_local_var()
+ */
 template<class T>
 int type_store_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide) {
@@ -33,7 +47,21 @@ int type_store_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fr
 }
 
 
-
+/**
+ * @brief template feito para ser reaproveitado pelos metodos de constante, que colocam uma constante na pilha de operandos
+ * 
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param VALOR_CONST 
+ * @return int 
+ * @sa push_stack
+ */
 template<class T>
 int type_const_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, T VALOR_CONST) {
@@ -43,6 +71,20 @@ int type_const_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack
     return 1;
 }
 
+/**
+ * @brief template que remove valores da pilha de operandos e coloca no local_var de acordo com o valor index
+ * que e recebido a partir do VALOR_CONST
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @return int 
+ * @sa get_top_and_pop_stack()
+ */
 template<class T>
 int type_store_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, T VALOR_CONST) {
@@ -54,6 +96,21 @@ int type_store_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack
     return 1;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param VALOR_CONST 
+ * @return int 
+ * @sa get_top_and_pop_stack
+ */
 template<class T>
 int a_store_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, int VALOR_CONST) {
@@ -65,6 +122,22 @@ int a_store_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
     return 1;
 }
 
+/**
+ * @brief template feito para ser reaproveitado pelos metodos math. Recebe a operacao a ser feita com o value_1 e value_2 e coloca o resultado na
+ *  pilha de operandos
+ * @tparam T 
+ * @tparam Comp 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param oper 
+ * @return int 
+ * @sa get_top_and_pop_stack , oper, push_stack
+ */
 template<class T, typename Comp>
 int type_math_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, Comp oper) {
@@ -84,6 +157,21 @@ int type_math_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack,
     return 1;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @tparam T 
+ * @tparam U 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @return int 
+ * @sa top_stack, pop_stack, push_stack
+ */
 template<class T, class U>
 int typeT_2_typeU_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide){
@@ -98,6 +186,20 @@ int typeT_2_typeU_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack,
     return 1;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @tparam U 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @return int 
+ * @sa top_stack, pop_stack, push_stack
+ */
 template<class U>
 int i2_typeU_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide) {
@@ -112,6 +214,21 @@ int i2_typeU_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return 1;
 }
 
+/**
+ * @brief template feito para ser reaproveitado por metodos de comparacao. Recebe um valor aux para verificacao do tipo de metodo sendo executado
+ * e coloca na pilha de operandos valores que podem ser -1, 0, 1 dependendo do resultado da comparacao e do tipo de funcao
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param aux 
+ * @return int 
+ * @sa get_top_and_pop_stack, push_stack
+ */
 template<class T>
 int type_comp_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, int aux){
@@ -135,6 +252,22 @@ int type_comp_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack,
     return 1;
 }
 
+/**
+ * @brief recebe uma operacao de comparacao para ser feita entre value_1 e value_2. Caso a operacao tenha sucesso, sera retornado o endereco de outra
+ * instrucao, caso contrario, sera retornado do endereco da proxima instrucao
+ * @tparam T 
+ * @tparam Comp 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param oper 
+ * @return int 
+ * @sa get_top_and_pop_stack
+ */
 template<class T, typename Comp>
 int type_if_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, Comp oper){
@@ -155,7 +288,20 @@ int type_if_num_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
             
 }
 
-
+/**
+ * @brief no-doc
+ * 
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @return int 
+ * @sa get_top_and_pop_stack, is_null
+ */
 template<class T>
 int type_astore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide) {
@@ -181,7 +327,21 @@ int type_astore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
     return 1;
 }
 
-
+/**
+ * @brief no-doc
+ * 
+ * @tparam T 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa get_top_and_pop_stack, pop, top, push_stack
+ */
 template<class T>
 int type_return_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -200,20 +360,24 @@ int type_return_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
 // Funcoes auxiliares
 
 /**
- * is_cat2.
- *
- * @author	Unknown
- * @since	v0.0.1
- * @version	v1.0.0	Tuesday, October 12th, 2021.
- * @global
- * @param	any	&v	
- * @return	mixed
+ * @brief no-doc
+ * 
+ * @param v 
+ * @return true 
+ * @return false 
  */
 bool is_cat2(const Any &v) {
 
     return v.is<long>() or v.is<double>();
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @param v 
+ * @return true 
+ * @return false 
+ */
 bool is_cat1(const Any &v) {
 
     return not is_cat2(v);
@@ -224,7 +388,7 @@ bool is_cat1(const Any &v) {
 // -- Instrucoes --
 /**
  * @brief 
- * 
+ * nao faz nada
  * @param m_area 
  * @param heap_area 
  * @param java_stack 
@@ -243,7 +407,7 @@ int nop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
 
 /**
  * @brief 
- * Retira do topo o valor na pilha de operando.
+ * Retira do topo o valor na pilha de operandos.
  * @param m_area 
  * @param heap_area 
  * @param java_stack 
@@ -252,7 +416,8 @@ int nop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
  * @param pc 
  * @param is_wide 
  * @param end_execution 
- * @return int 
+ * @return int
+ * @sa pop_stack 
  */
 int pop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -262,8 +427,20 @@ int pop_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
     return 1;            
 }
 
-
-
+/**
+ * @brief retira dois valores do topo da pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa pop_stack
+ */
 int pop2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
 
@@ -273,6 +450,20 @@ int pop2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return 1;            
 }
 
+/**
+ * @brief duplica o valor do topo da pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, push_stack
+ */
 int dup_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
@@ -283,6 +474,20 @@ int dup_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
     
 }
 
+/**
+ * @brief duplica o valor do topo da pilha de operandos e insere duas posicoes abaixo
+ * do valor duplicado
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack
+ */
 int dup_x1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
@@ -300,6 +505,20 @@ int dup_x1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
         
 }
 
+/**
+ * @brief duplica o valor da primeira posicao da pilha de operandos e insere duas ou tres posicoes abaixo na pilha
+ * dependendo se o valor embaixo do valor que foi copiado e do tipo cat2
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack, is_cat2, push_stack
+ */
 int dup_x2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
@@ -333,6 +552,20 @@ int dup_x2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
         
 }
 
+/**
+ * @brief Duplica uma ou duas no topo da pilha de operando, dependendo do se o primeiro do topo é cat2. 
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack, is_cat2, push_stack
+ */
 int dup2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
@@ -357,7 +590,20 @@ int dup2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     
 }
 
-
+/**
+ * @brief duplica um ou dois valores da pilha de operandos e insere os mesmos duas ou tres
+ * posicoes abaixo dependendo se o primeiro valor da pilha e do tipo cat1 ou nao
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack, is_cat2, push_stack
+ */
 int dup2_x1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
@@ -389,6 +635,21 @@ int dup2_x1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     
     return 1;
 }
+
+/**
+ * @brief duplica um ou dois valores da pilha de operandos e insere os mesmos duas, tres ou quatro
+ * posicoes abaixo dependendo dos tipos do primeiro, segundo e terceiro valor na pilha, verificando se os mesmos sao cat1 ou cat2
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack, is_cat2, push_stack
+ */
 
 int dup2_x2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -444,6 +705,20 @@ int dup2_x2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief Troca os dois valores do topo da pilha de operando.
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa top_stack, pop_stack, push_stack
+ */
 int swap_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
         
@@ -465,126 +740,420 @@ int swap_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Math
 
+/**
+ * @brief Soma os dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int iadd_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x + y;});
 }
 
+/**
+ * @brief Soma os dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ladd_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x + y;});
 }
 
+/**
+ * @brief Soma os dois valores float do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int fadd_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<float>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](float  x, float y) { return x + y;});
 }
 
+/**
+ * @brief Soma os dois valores double do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int dadd_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<double>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](double x, double y) { return x + y;});
 }
 
+/**
+ * @brief Subtrai os dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int isub_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x - y;});
 }
 
+/**
+ * @brief Subtrai os dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lsub_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x - y;});
 }
 
+/**
+ * @brief Subtrai os dois valores float do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int fsub_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<float>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](float  x, float y) { return x - y;});
 }
 
+/**
+ * @brief Subtrai os dois valores double do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int dsub_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<double>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](double x, double y) { return x - y;}); 
 }
 
+/**
+ * @brief multiplica os dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int imul_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x * y;});
 }
 
+/**
+ * @brief multiplica os dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lmul_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x * y;});
 }
 
+/**
+ * @brief multiplica os dois valores float do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int fmul_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<float>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](float  x, float y) { return x * y;});
 }
 
+/**
+ * @brief multiplica os dois valores double do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int dmul_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<double>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](double x, double y) { return x * y;});
 }
 
+/**
+ * @brief Dividi os dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int idiv_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x / y;});
 }
 
+/**
+ * @brief Dividi os dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ldiv_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x / y;});
 }
 
+/**
+ * @brief Dividi os dois valores float do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int fdiv_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<float>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](float  x, float y) { return x / y;});
 }
 
+/**
+ * @brief Dividi os dois valores double do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ddiv_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<double>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](double x, double y) { return x / y;});
 }
 
+/**
+ * @brief pega o restante da divisao dos dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int irem_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x % y;});
 }
 
+/**
+ * @brief pega o restante da divisao dos dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lrem_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x % y;});
 }
 
+/**
+ * @brief pega o restante da divisao dos dois valores float do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int frem_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<float>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](float  x, float y) { return (float) ((int )x % (int)y);});
 }
 
+/**
+ * @brief pega o restante da divisao dos dois valores double do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int drem_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<double>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](double x, double y) { return  (double) ((long )x % (long) y);});
 }
 
+/**
+ * @brief Nega o valor inteiro
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int ineg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     
@@ -599,6 +1168,20 @@ int ineg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return 1;
 }
 
+/**
+ * @brief Nega o valor long
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int lneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     
@@ -613,6 +1196,20 @@ int lneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return 1;
 }
 
+/**
+ * @brief Nega o valor float
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int fneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     
@@ -627,6 +1224,20 @@ int fneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return 1;
 }
 
+/**
+ * @brief Nega o valor double
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int dneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     
@@ -641,30 +1252,100 @@ int dneg_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return 1;
 }
 
+/**
+ * @brief Realiza o deslocamento a esquerda do valor1 por 5 bits de posicao do valor2 resultando em um inteiro 
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ishl_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x << y;});
 }
 
+/**
+ * @brief Realiza o deslocamento a esquerda do valor1 por 6 bits de posicao do valor2 resultando em um long
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lshl_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x << y;});
 }
 
+/**
+ * @brief Realiza o deslocamento a direita do valor1 por 5 bits de posicao do valor2 resultando em um inteiro 
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ishr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x >> y;});
 }
 
+/**
+ * @brief Realiza o deslocamento a direita do valor1 por 6 bits de posicao do valor2 resultando em um long 
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lshr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x >> y;});
 }
 
+/**
+ * @brief Realiza o deslocamento logico a direita do valor1 por 5 bits de posicao do valor2 com zero de extensao
+ * resultando em um inteiro
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int iushr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     // return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
@@ -685,6 +1366,20 @@ int iushr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
 
 }
 
+/**
+ * @brief Realiza o deslocamento logico a direita do valor1 por 6 bits de posicao do valor2 com zero de extensao
+ * resultando em um long
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lushr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     // return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
@@ -704,43 +1399,140 @@ int lushr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return 1;
 }
 
+/**
+ * @brief Realiza a operacao logica AND nos dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int iand_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x & y;});
 }
 
+/**
+ * @brief Realiza a operacao logica AND nos dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int land_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x & y;});
 }
 
+/**
+ * @brief Realiza a operacao logica OR nos dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ior_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x | y;});
 }
 
+/**
+ * @brief Realiza a operacao logica OR nos dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lor_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x | y;});
 }
 
+/**
+ * @brief Realiza a operacao logica XOR nos dois valores inteiros do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int ixor_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<int>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](int x, int y) { return x ^ y;});
 }
 
+/**
+ * @brief Realiza a operacao logica XOR nos dois valores long do topo da pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_math_num_i
+ */
 int lxor_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     return type_math_num_i<long>(m_area, heap_area, java_stack, my_frame,
         code_vector, pc, is_wide, [](long x, long y) { return x ^ y;});
 }
 
-
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa at()
+ */
 int iinc_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -768,6 +1560,21 @@ int iinc_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa except.h, get_top_and_pop_stack, size, push_stack
+ */
 int aaload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -788,6 +1595,22 @@ int aaload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Constants
+
+/**
+ * @brief e feito um cast do byte imediato para int e colocado na pilha de operando
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int bipush_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -798,6 +1621,21 @@ int bipush_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
     return 2;
 }
 
+/**
+ * @brief e feito o cast para int de um endereco short de uma instrucao da pilha e o valor resultante e jogado de volta na pilha
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int sipush_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
 
@@ -807,6 +1645,21 @@ int sipush_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
     
     return 3;
 }
+
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa get_const_pool, getFloatVal, push_stack, constantToString, front, set_type, pushRef, load_class, get_class, get_class_name
+ */
 
 int ldc_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -867,6 +1720,21 @@ int ldc_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
     return 2;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa get_const_pool, getFloatVal, push_stack, push_stack, constantToString, front, set_type, pushRef, load_class, get_class, get_class_name
+ */
+
 int ldc_w_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -926,6 +1794,20 @@ int ldc_w_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return 3;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa get_const_pool, getLongVal, push_stack, getDoubleVal
+ */
 
 int ldc2_w_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -955,6 +1837,20 @@ int ldc2_w_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
     return 3;
 }
 
+/**
+ * @brief coloca um valor null na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int aconst_null_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -964,11 +1860,41 @@ int aconst_null_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
     return 1;
 }
 
+/**
+ * @brief retorna o valor int -1 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int iconst_m1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, -1);
 }
+
+/**
+ * @brief retorna o valor int 0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int iconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -976,11 +1902,41 @@ int iconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
 
+/**
+ * @brief retorna o valor int 1 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int iconst_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
+
+/**
+ * @brief retorna o valor int 2 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int iconst_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -988,11 +1944,41 @@ int iconst_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
 
+/**
+ * @brief retorna o valor int 3 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int iconst_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 3);
 }
+
+/**
+ * @brief retorna o valor int 4 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int iconst_4_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1000,11 +1986,41 @@ int iconst_4_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 4);
 }
 
+/**
+ * @brief retorna o valor int 5 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int iconst_5_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 5);
 }
+
+/**
+ * @brief retorna o valor long 0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int lconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1012,11 +2028,41 @@ int lconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
 
+/**
+ * @brief retorna o valor long 1 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int lconst_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
+
+/**
+ * @brief retorna o valor float 0.0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int fconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1024,11 +2070,41 @@ int fconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0.0);
 }
 
+/**
+ * @brief retorna o valor float 1.0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int fconst_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1.0);
 }
+
+/**
+ * @brief retorna o valor float 2.0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int fconst_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1036,11 +2112,41 @@ int fconst_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_const_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2.0);
 }
 
+/**
+ * @brief retorna o valor double 0.0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
+
 int dconst_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_const_num_i<double>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0.0);
 }
+
+/**
+ * @brief retorna o valor double 1.0 para o template que ira inseri-lo na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_const_num_i
+ */
 
 int dconst_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1050,6 +2156,21 @@ int dconst_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
 
 
 // aload -------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index do tipo objectref e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int aload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1072,6 +2193,21 @@ int aload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return advance_bytes;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 0 do tipo objectref e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int aload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1079,6 +2215,21 @@ int aload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 1 do tipo objectref e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 
 int aload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
@@ -1089,6 +2240,20 @@ int aload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 2 do tipo objectref e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int aload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1097,6 +2262,21 @@ int aload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 3 do tipo objectref e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int aload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1107,6 +2287,21 @@ int aload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 }
 
 // dload -------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index do tipo double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int dload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1129,6 +2324,21 @@ int dload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return advance_bytes;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 0 do tipo double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int dload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1136,6 +2346,21 @@ int dload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 1 do tipo double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int dload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1145,6 +2370,21 @@ int dload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 2 do tipo double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int dload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1152,6 +2392,21 @@ int dload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 3 do tipo double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int dload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1162,6 +2417,21 @@ int dload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 }
 
 // iload -------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index do tipo int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int iload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1183,6 +2453,21 @@ int iload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return advance_bytes;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 0 do tipo int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int iload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1190,6 +2475,21 @@ int iload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 1 do tipo int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int iload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1199,6 +2499,21 @@ int iload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 2 do tipo int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int iload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1206,6 +2521,21 @@ int iload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 3 do tipo int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int iload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1216,6 +2546,21 @@ int iload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 }
 
 // lload -------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index do tipo long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int lload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1237,6 +2582,21 @@ int lload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return advance_bytes;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 0 do tipo long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int lload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1244,6 +2604,21 @@ int lload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 1 do tipo long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int lload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1253,6 +2628,21 @@ int lload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 2 do tipo long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int lload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1260,6 +2650,21 @@ int lload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 3 do tipo long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int lload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1269,6 +2674,21 @@ int lload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 // fload ----------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index do tipo float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int fload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1290,6 +2710,21 @@ int fload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* 
     return advance_bytes;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 0 do tipo float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int fload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1297,6 +2732,21 @@ int fload_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 1 do tipo float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int fload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1306,6 +2756,21 @@ int fload_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
     return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao 2 do tipo float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int fload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1313,6 +2778,21 @@ int fload_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
     return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao 3 do tipo float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int fload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1323,6 +2803,21 @@ int fload_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 }
 
 // -----------------------------------------------------------------------------------------
+
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de int e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 int iaload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
 
@@ -1333,6 +2828,21 @@ int iaload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
 
             return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de float e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int faload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -1346,6 +2856,21 @@ int faload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de long e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int laload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
             
@@ -1358,6 +2883,21 @@ int laload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de double e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int daload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
             int index_array = my_frame->get_top_and_pop_stack<int>();
@@ -1368,6 +2908,21 @@ int daload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de byte e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int baload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
             int index_array = my_frame->get_top_and_pop_stack<int>();
@@ -1376,6 +2931,21 @@ int baload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             my_frame->push_stack((int) (char) array_ref->single_value.as<Array_t*>()->my_data.at(index_array).as<u1>());
             return 1;
 }
+
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de char e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
 
 int caload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -1387,6 +2957,21 @@ int caload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             return 1;
 }
 
+/**
+ * @brief a referencia da variavel local na posicao index_array de um vetor de short e colocada na pilha de operandos
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int saload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
             int index_array = my_frame->get_top_and_pop_stack<int>();
@@ -1396,6 +2981,21 @@ int saload_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
             my_frame->push_stack(array_ref->single_value.as<Array_t*>()->my_data.at(index_array).as<short>());
             return 1;
 }
+
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa find, get_instructions, next_instruct, iinc_i
+ */
 
 int wide_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1439,6 +3039,21 @@ int wide_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
     return bytes_to_incr_pc;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa constantToString, get_class, set_type, get_class_name, pushRef
+ */
+
 int anewarray_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
@@ -1471,6 +3086,21 @@ int anewarray_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fra
     return advance_bytes;
 }
 
+/**
+ * @brief no-doc
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa push_stack
+ */
+
 int arraylength_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
     
@@ -1501,11 +3131,41 @@ int arraylength_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, f
 
 
 // Stores types --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo objectref para o template type_store_i
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_i()
+ */
 int astore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_i<Object*>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
+
+/**
+ * @brief envia o tipo int para o template type_store_i
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_i()
+ */
 
 int istore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1513,17 +3173,62 @@ int istore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
     return type_store_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief envia o tipo long para o template type_store_i
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_i()
+ */
+
 int lstore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief envia o tipo float para o template type_store_i
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_i()
+ */
+
 int fstore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
+
+/**
+ * @brief envia o tipo double para o template type_store_i
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_i()
+ */
 
 int dstore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1532,11 +3237,42 @@ int dstore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame*
 }
 
 // Stores ints --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo int para o template type_store_num_i atribuindo 0 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int istore_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
+
+/**
+ * @brief envia o tipo int para o template type_store_num_i atribuindo 1 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int istore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1544,11 +3280,41 @@ int istore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_store_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
 
+/**
+ * @brief envia o tipo int para o template type_store_num_i atribuindo 2 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int istore_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<int>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
+
+/**
+ * @brief envia o tipo int para o template type_store_num_i atribuindo 3 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int istore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1557,11 +3323,42 @@ int istore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
 }
 
 // Stores longs --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo long para o template type_store_num_i atribuindo 0 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int lstore_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
+
+/**
+ * @brief envia o tipo long para o template type_store_num_i atribuindo 1 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int lstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1569,11 +3366,41 @@ int lstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_store_num_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
 
+/**
+ * @brief envia o tipo long para o template type_store_num_i atribuindo 2 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int lstore_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
+
+/**
+ * @brief envia o tipo long para o template type_store_num_i atribuindo 3 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int lstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1582,11 +3409,42 @@ int lstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
 }
 
 // Stores floats --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo float para o template type_store_num_i atribuindo 0 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int fstore_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
+
+/**
+ * @brief envia o tipo float para o template type_store_num_i atribuindo 1 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int fstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1594,11 +3452,41 @@ int fstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_store_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
 
+/**
+ * @brief envia o tipo float para o template type_store_num_i atribuindo 2 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int fstore_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
+
+/**
+ * @brief envia o tipo float para o template type_store_num_i atribuindo 3 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int fstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1607,11 +3495,42 @@ int fstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
 }
 
 // Stores doubles --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo double para o template type_store_num_i atribuindo 0 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int dstore_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<double>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
+
+/**
+ * @brief envia o tipo double para o template type_store_num_i atribuindo 1 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int dstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1619,11 +3538,41 @@ int dstore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return type_store_num_i<double>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
 
+/**
+ * @brief envia o tipo double para o template type_store_num_i atribuindo 2 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int dstore_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return type_store_num_i<double>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
+
+/**
+ * @brief envia o tipo double para o template type_store_num_i atribuindo 3 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int dstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1632,11 +3581,42 @@ int dstore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
 }
 
 // Stores references --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * @brief envia o tipo objectref para o template type_store_num_i atribuindo 0 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int astore_0_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return a_store_num_i<Object*>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 0);
 }
+
+/**
+ * @brief envia o tipo objectref para o template type_store_num_i atribuindo 1 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int astore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1644,11 +3624,41 @@ int astore_1_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fram
     return a_store_num_i<Object*>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 1);
 }
 
+/**
+ * @brief envia o tipo objectref para o template type_store_num_i atribuindo 2 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
+
 int astore_2_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
 
     return a_store_num_i<float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide, 2);
 }
+
+/**
+ * @brief envia o tipo objectref para o template type_store_num_i atribuindo 3 ao index
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int 
+ * @sa type_store_num_i()
+ */
 
 int astore_3_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution) {
@@ -1716,36 +3726,106 @@ int aastore_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame
 
 
 // Conversions--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+/**
+ * @brief Converte o valor inteiro do topo da pilha de operando para long
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int
+ * @sa typeT_2_typeU_i
+ */
 int i2l_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
     return typeT_2_typeU_i<int, long>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief Converte o valor inteiro do topo da pilha de operando para float
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int
+ * @sa typeT_2_typeU_i
+ */
 int i2f_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
     return typeT_2_typeU_i<int, float>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief Converte o valor inteiro do topo da pilha de operando para double
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int
+ * @sa typeT_2_typeU_i
+ */
 int i2d_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
     return typeT_2_typeU_i<int, double>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief Converte o valor inteiro do topo da pilha de operando para byte
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int
+ * @sa i2_typeU_i
+ */
 int i2b_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
-    return i2_typeU_i<char>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
+    return i2_typeU_i<u1>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
 
+/**
+ * @brief Converte o valor inteiro do topo da pilha de operando para char
+ * 
+ * @param m_area 
+ * @param heap_area 
+ * @param java_stack 
+ * @param my_frame 
+ * @param code_vector 
+ * @param pc 
+ * @param is_wide 
+ * @param end_execution 
+ * @return int
+ * @sa i2_typeU_i
+ */
 int i2c_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
     
     return i2_typeU_i<char>(m_area, heap_area, java_stack, my_frame, code_vector, pc, is_wide);
 }
+
 
 int i2s_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){ 
@@ -1809,7 +3889,7 @@ int d2f_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
 
 // ------------------------------------------------------------------------------------------------------------------------
 
-// Comparison------------------------------------------------------------------------------------------------------------------------
+// Comparisons ------------------------------------------------------------------------------------------------------------------------
 
 int lcmp_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
@@ -1911,7 +3991,7 @@ int goto_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* m
         const u1* code_vector, int pc, bool is_wide, bool &end_execution){
 
             int branchoffset = ((short) ((code_vector[pc + 1] << 8) | code_vector[pc + 2]));
-            return branchoffset;
+            return branchoffset - 1;
 }
 
 int jsr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
@@ -1921,7 +4001,7 @@ int jsr_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
             
             my_frame->push_stack(pc + 3);
 
-            return jump_adress;
+            return jump_adress -1;
 }
 
 int ret_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
@@ -1940,7 +4020,7 @@ int ret_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my
         jump_address = my_frame->local_vars.at(index).as<returnAddress>();
     }
 
-    return jump_address;
+    return jump_address - 1;
 }
 
 int tableswitch_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,
@@ -2089,9 +4169,15 @@ int getstatic_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fra
     std::pair<std::string, std::string> name_and_type;
 
     get_symbolic_ref(class_name, name_and_type, pc, my_frame, code_vector);
-    Field_t &class_field = m_area->get_class_field(my_frame->cs_ref, class_name, name_and_type);
 
-    my_frame->push_stack(class_field.data);
+    if(java_special::is_from_java_lang(class_name, name_and_type));
+    
+    else {
+        Field_t &class_field = m_area->get_class_field(my_frame->cs_ref, class_name, name_and_type);
+
+        my_frame->push_stack(class_field.data);   
+    }
+    
 
     return 3;
 }
@@ -2104,12 +4190,16 @@ int putstatic_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack, fra
 
     get_symbolic_ref(class_name, name_and_type, pc, my_frame, code_vector);
 
-    Field_t &class_field = m_area->get_class_field(my_frame->cs_ref, class_name, name_and_type);
+    if(java_special::is_from_java_lang(class_name, name_and_type));
 
-    Any the_new_value = my_frame->top_stack();
-    my_frame->pop_stack();
+    else  {
+        Field_t &class_field = m_area->get_class_field(my_frame->cs_ref, class_name, name_and_type);
 
-    class_field.data = the_new_value;
+        Any the_new_value = my_frame->top_stack();
+        my_frame->pop_stack();
+
+        class_field.data = the_new_value;
+    }
 
     return 3;
 }
@@ -2176,7 +4266,10 @@ void get_args_to_method(std::vector<Any> &args, frame* fr, std::string descripto
 
     for(size_t i = 0; i < descriptor.size(); i++) {
 
-        if(descriptor[i] != '(' and descriptor[i] != ')') {
+        if(descriptor[i] == ')')
+            break;
+
+        if(descriptor[i] != '(') {
 
             switch(descriptor[i]) {
             case 'B':
@@ -2242,13 +4335,21 @@ int invokevirtual_i(method_area* m_area, heap* heap_area, jvm_stack* java_stack,
     }
 
     // Considerar que podem ser chamados metodos de strings, ou metodos para printar elementos
-    method_info method_data = m_area->get_class_method(my_frame->cs_ref, class_name, name_and_type);
-
     std::vector<Any> args;
 
-    get_args_to_method(args, my_frame, name_and_type.second, true);
+    if(java_special::is_from_java_lang(class_name, name_and_type)) {
+        get_args_to_method(args, my_frame, name_and_type.second, false);
 
-    the_interpreter->execute_method(class_name, method_data, args);
+        java_special::find_and_exec_method(name_and_type.first, args);
+                
+    } else {
+        
+        get_args_to_method(args, my_frame, name_and_type.second, true);
+        method_info method_data = m_area->get_class_method(my_frame->cs_ref, class_name, name_and_type);
+
+        the_interpreter->execute_method(class_name, method_data, args);
+    } 
+    
     return 3;
 }
 

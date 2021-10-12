@@ -1,6 +1,19 @@
+/*!
+* \file \src\except.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef EXCEPT_H_
 #define EXCEPT_H_
 
+/*! Importation of librairies*/
 #include <exception>
 #include <string>
 #include <typeinfo>

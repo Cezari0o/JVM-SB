@@ -1,6 +1,19 @@
+/*!
+* \file \src\data_objects.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef DATA_OBJECTS_H_
 #define DATA_OBJECTS_H_
 
+/*! Importation of librairies*/
 #include <map>
 #include <sstream>
 #include <vector>

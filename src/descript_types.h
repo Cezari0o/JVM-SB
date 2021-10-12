@@ -1,8 +1,20 @@
+/*!
+* \file \src\descript_types.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef DESCRIPT_TYPES_H_
 #define DESCRIPT_TYPES_H_
 
 enum FIELD_TYPES {
-    BASE_TYPE = 1,
+    // BASE_TYPE = 1,
     OBJECT_TYPE,
     ARRAY_TYPE,
     // ARRAY_REF_TYPE,

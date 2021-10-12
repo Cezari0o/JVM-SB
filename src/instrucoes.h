@@ -8,6 +8,7 @@
 #include "data_objects.h"
 #include "str_func.h"
 #include "descript_types.h"
+#include "special_java_classes.h"
 
 // Instrucoes devem retornar a quantidade total de bytes que elas usaram do vetor de instrucoes
 typedef int instruct(method_area* m_area, heap* heap_area, jvm_stack* java_stack, frame* my_frame,

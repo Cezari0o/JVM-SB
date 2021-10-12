@@ -1,3 +1,15 @@
+/*!
+* \file \src\access_flags.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef ACCESS_FLAGS_H_
 #define ACCESS_FLAGS_H_
 

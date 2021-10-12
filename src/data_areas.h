@@ -1,6 +1,19 @@
+/*!
+* \file \src\data_areas.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef DATA_AREAS_H_
 #define DATA_AREAS_H_
 
+/*! Importation of librairies*/
 #include <vector>
 #include <stack>
 #include <map>

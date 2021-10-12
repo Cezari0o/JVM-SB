@@ -1,6 +1,19 @@
+/*!
+* \file \src\any.h
+* \version 0.1
+* \date 12/10/2021
+* \brief 
+* \remarks None
+* 
+* 
+* 
+*/
+
+
 #ifndef ANY_H_
 #define ANY_H_
 
+/*! Importation of librairies*/
 #include <type_traits>
 #include <utility>
 #include <typeinfo>
