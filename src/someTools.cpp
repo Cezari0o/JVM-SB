@@ -38,7 +38,7 @@ u4 read4Byte(std::fstream &file){
 u1* readBytes(u4 total_bytes, std::fstream &file) {
     u1 *byteArray = new u1[total_bytes];
 
-    for(int it = 0; it < total_bytes; it++) {
+    for(u4 it = 0; it < total_bytes; it++) {
         byteArray[it] = read1Byte(file);
         // cout << byteArray[it] << endl;
         // if(byteArray[it] == 0 or byteArray[it] >= ((u1)240) and byteArray[it] <= ((u1)255))

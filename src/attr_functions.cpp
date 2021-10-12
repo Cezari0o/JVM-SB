@@ -167,7 +167,7 @@ attribute_info* readAttr(std::fstream &file, const std::vector<cp_info> &cp) {
     else {
 
         // Nao lancar excessoes !!!
-        for(int i = 0; i < att->att_length; i++) { // Lendo somente para ajuste do ponteiro de arquivo
+        for(u4 i = 0; i < att->att_length; i++) { // Lendo somente para ajuste do ponteiro de arquivo
             read1Byte(file);
         }
     }

@@ -15,6 +15,7 @@
 #include <bits/stdc++.h>
 #include "classes.h"
 #include "attr_functions.h"
+#include "except.h"
 
 using namespace std;
 
@@ -44,7 +45,7 @@ using namespace std;
  * @return	O Classfile lido.
  * @sa      ClassFile
  */
-ClassFile readClassFile(const std::string &path);
+ClassFile readClassFile(const std::string &path); // <-  Arrumar as excecoes nesta funcao
 
 #endif
 

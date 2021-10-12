@@ -8,7 +8,7 @@ std::vector<cp_info> readConstantPool(std::fstream &file, u2 cp_count) {
 
     std::vector<cp_info> cp(cp_count - 1);
 
-    for(int i = 0; i < cp.size(); i++) {
+    for(size_t i = 0; i < cp.size(); i++) {
         u1 tag = read1Byte(file);
 
         switch (tag) {
@@ -118,7 +118,7 @@ std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, c
     if(total_fields > 0) {
         fields.resize(total_fields);
 
-        for(int i = 0; i < fields.size(); i++) {
+        for(size_t i = 0; i < fields.size(); i++) {
             field_info* f = new field_info;
 
             f->access_flags     = read2Byte(file);
@@ -126,6 +126,7 @@ std::vector<field_info> readFields(std::fstream &file, const u2 &total_fields, c
             f->descriptor_index = read2Byte(file);
             f->attributes_count = read2Byte(file);
             f->attributes       = new attribute_info[f->attributes_count];
+            // f->attributes.resize(f->attributes_count);
 
             for(int j = 0; j < f->attributes_count; j++) {
                 attribute_info* attr_f = readAttr(file, cp);
@@ -151,7 +152,7 @@ std::vector<method_info> readmethods(std::fstream &file, const u2 &total_methods
     if(total_methods > 0) {
         methods.resize(total_methods);
 
-        for(int i = 0; i < methods.size(); i++) {
+        for(size_t i = 0; i < methods.size(); i++) {
             method_info* m = new method_info;
 
             m->access_flags     = read2Byte(file);
@@ -200,6 +201,7 @@ ClassFile readClassFile(const std::string &path){
     file.open(path, std::fstream::in | std::fstream::binary);
 
     if(!file.is_open()) {
+        throw ClassNotFoundException("Classe " + path + " nao encontrada!");
         showExcept("Nao foi possivel abrir o arquivo");
     }
 
