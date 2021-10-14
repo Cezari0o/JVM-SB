@@ -75,8 +75,8 @@ void showGeneralInformation(const ClassFile &cf, std::ostream &outstream) {
     outstream << "Constant pool count: " << cf.constant_pool_count << endl;    
     outstream << "Classe do arquivo: cp_info #" << cf.this_class << " <" << 
     constantToString(cf.constant_pool[cf.this_class - 1], cf.constant_pool).front() << ">\n";
-    outstream << "Super classe : cp_info #" << cf.super_class << " <" << 
-    constantToString(cf.constant_pool[cf.super_class - 1], cf.constant_pool).front() << ">\n";
+    outstream << "Super classe : cp_info #" << cf.super_class << " <" << (cf.super_class > 0?
+    constantToString(cf.constant_pool[cf.super_class - 1], cf.constant_pool).front() : "invalid constant pool reference") << ">\n";
     outstream << "Quant. de Interfaces : " << cf.interfaces_count << endl;
     outstream << "Quant. de Fields : " << cf.fields_count << endl;
     outstream << "Quant. de Metodos : " << cf.methods_count << endl;

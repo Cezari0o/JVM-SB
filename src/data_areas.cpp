@@ -336,16 +336,16 @@ class_space &method_area::get_class(const std::string &class_name) {
 
 void method_area::load_class(const std::string &cl_name) {
     // bool carregado = false;
-    char separator = '/';
+    // char separator = '/';
 
     std::string class_path;
     std::string class_name;
 
-    size_t temp_num = cl_name.find_last_of(separator);
+    // size_t temp_num = cl_name.find_last_of(separator);
 
-    temp_num = (temp_num == std::string::npos? 0 : temp_num + 1);
-    class_name = cl_name.substr(temp_num);
-    class_name = class_name.substr(0, class_name.find_last_of('.'));
+    // temp_num = (temp_num == std::string::npos? 0 : temp_num + 1);
+    // class_name = cl_name.substr(temp_num);
+    class_name = cl_name.substr(0, cl_name.find_last_of('.'));
 
     size_t dot_idx = cl_name.find_last_of('.');
     if(dot_idx == std::string::npos) {
@@ -361,7 +361,7 @@ void method_area::load_class(const std::string &cl_name) {
         std::cout << "Class name: " << class_name << "\n\n";
     }
 
-    if(this->is_loaded(class_path))
+    if(this->is_loaded(class_name))
         return;
 
     if(DEBUG_MODE)
@@ -534,18 +534,18 @@ class_space &method_area::get_class(class_space *calling_class, const std::strin
     }
     
     // u2 flags_calling_class  = calling_class->get_class_file().access_flags;
-    u2 flags_required_class = required_class->get_class_file().access_flags;
+    // u2 flags_required_class = required_class->get_class_file().access_flags;
 
-    if(!(flags_required_class & ACCESS_FLAGS_CLASS_FILE::ACC_PUBLIC)) {
-        stringstream buffer;
-        buffer << "(Area de metodos) ";
-        buffer << "A classe requerida possui acesso restrito!\n";
-        buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
-        buffer << "Classe requerida: " << required_class->get_class_name() << "\n";
+    // if((flags_required_class & ACCESS_FLAGS_CLASS_FILE::ACC_PUBLIC)) {
+    //     stringstream buffer;
+    //     buffer << "(Area de metodos) ";
+    //     buffer << "A classe requerida possui acesso restrito!\n";
+    //     buffer << "Classe chamadora: " << calling_class->get_class_name() << "\n";
+    //     buffer << "Classe requerida: " << required_class->get_class_name() << "\n";
 
-        std::cout << buffer.str();
-        // throw IllegalAccessError(buffer.str());
-    }
+    //     std::cout << buffer.str();
+    //     // throw IllegalAccessError(buffer.str());
+    // }
 
     return *required_class;
 }
@@ -717,6 +717,9 @@ void init_field(const std::string &field_name, std::string field_descriptor, Fie
             break;
 
         case '[':
+            // new_ref = new Object();
+            // new_ref->set_type(FIELD_TYPES::ARRAY_TYPE);
+            // new_ref->single_value = get_array(field_descriptor);
             (*field_data) = get_array(field_descriptor);
             break;
     }
@@ -1034,7 +1037,7 @@ const method_info &method_area::get_method(const std::string &class_name, const 
 }
 
 Array_t *get_array(std::string descriptor) { // Num sei o q fazer ainda
-    Array_t* a;
+    Array_t* a = nullptr;
 
     return a;
 }

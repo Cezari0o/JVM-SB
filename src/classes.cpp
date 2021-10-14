@@ -151,7 +151,7 @@ cp_info& cp_info::operator=(const cp_info &cp) {
 
 method_info::~method_info() {
 
-    // delete[] this->attributes;
+    delete[] this->attributes;
 }
 
 // Isso tudo num serve de nada kkkk.
@@ -248,24 +248,24 @@ void delConstant(attribute_info* att) {
 
 void delCode(attribute_info* att) {
 
-    // delete[] att->attr.Code.code;
-    // delete[] att->attr.Code.except_tb_array;
-    // delete[] att->attr.Code.attributes;
+    delete[] att->attr.Code.code;
+    delete[] att->attr.Code.except_tb_array;
+    delete[] att->attr.Code.attributes;
 }
 
 void delExceptions(attribute_info * att) {
 
-    // delete[] att->attr.Exceptions.exception_index_table_array;
+    delete[] att->attr.Exceptions.exception_index_table_array;
 }
 
 void delLineNumberTable(attribute_info* att) {
 
-    // delete[] att->attr.LineNumberTable.l_num_table_array;
+    delete[] att->attr.LineNumberTable.l_num_table_array;
 }
 
 void delLocalVariableTable(attribute_info* att) {
 
-    // delete[] att->attr.LocalVariableTable.lv_tb_array;
+    delete[] att->attr.LocalVariableTable.lv_tb_array;
 }
 
 void delSourceFile(attribute_info* att) {

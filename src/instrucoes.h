@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <utility>
+#include <cmath>
 #include <algorithm>
 #include "data_areas.h"
 #include "data_objects.h"

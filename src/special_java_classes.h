@@ -18,7 +18,8 @@
 
 namespace java_special {
 
-    bool is_from_java_lang(const std::string class_name, const std::pair<std::string, std::string> &name_and_type);
+    bool is_from_java_lang(const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
+    bool is_from_java_lang(const std::string &str);
 
     void find_and_exec_method(const std::string &method_name, std::vector<Any> &args);
     class PrintStream {

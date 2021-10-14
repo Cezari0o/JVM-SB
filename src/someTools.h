@@ -16,10 +16,10 @@
 #include <stdint.h>
 
 // Definicoes para uso nos demais arquivos
-typedef unsigned char  u1; // <- 1 Byte
-typedef unsigned short u2; // <- 2 Bytes
-typedef unsigned int   u4; // <- 4 Bytes
-typedef unsigned long  u8; // <- 8 Bytes
+typedef uint8_t     u1; // <- 1 Byte
+typedef uint16_t    u2; // <- 2 Bytes
+typedef uint32_t    u4; // <- 4 Bytes
+typedef uint64_t    u8; // <- 8 Bytes
 
 /**
  * @brief Le byte(s) do arquivo lido, e retorna esse(s) byte(s).

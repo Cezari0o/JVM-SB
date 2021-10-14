@@ -58,12 +58,30 @@ void showExcept(const std::string &msg) {
 
 void showHelp(std::ostream &output) {
 
-    output << "-- Implementacao da JVM para o trabalho de Software Basico -- \n\n";
-    output << "(Ate o momento, apenas o leitor e o exibidor foram implementados)\n";
-    output << "Le os dados de um arquivo class e mostra no terminal o que foi lido.\n\n";
-    output << "Digite o nome do arquivo class que deve ser utilizado\n";
-    output << "Por exemplo, para um arquivo \"teste.class\", use da seguinte forma:\n";
+    output << "-- Java Virtual Machine, para a disciplina Software Basico -- \n\n";
+    
+    output << "Integrantes do grupo:\n";
+    output << "Stefano Luppi Sposito            - 18/0043242\n";
+    output << "Joao Victor Pinheiro de Souza    - 18/0103407\n";
+    output << "Raylan da Silva Sales            - 18/0108531\n";
+    output << "Gabriel Cesario Silva Martins    - 18/0100912\n\n";
+
+    output << "Para usar a opcao de leitor, utilize o executavel na seguinte forma:\n";
+    output << "Linux:\n";
+    output << "Uso: ./JVM_SB <caminho_classe_principal> -l\n\n";
+
+    output << "Windows:\n";
+    output << "Uso: JVM_SB.exe <caminho_classe_principal> -l\n\n";
+   
+    output << "Para rodar um arquivo, utilize a seguinte forma:\n";
+    output << "JVM_SB <classe_principal>\n\n";
+
+    output << "Exemplo de uso, para um arquivo \"teste.class\":\n";
     output << "JVM_SB teste.class\n\n";
+
+    output << "Flags para usar na JVM:\n";
+    output << "-l : Ativa a opcao de exibidor de bytecode (semelhante ao jclasslib)\n";
+    output << "-L: faz o mesmo que a flag -l\n";
     output << "-h : mostra a ajuda na tela e sai\n\n";
     output << "--help : mostra a ajuda na tela e sai\n\n";
 }

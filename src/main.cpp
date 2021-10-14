@@ -18,7 +18,7 @@ int main(int arg_count, char* argument_vector[]) {
     string caminho;
     vector<string> arguments(arg_count);
 
-    if(arg_count > 3) {
+    if(arg_count > 3 and arg_count < 2) {
         string msg = "Numero de argumentos invalido\n";
         msg += "Digite --help para obter ajuda.\n";
         showExcept(msg);
@@ -30,10 +30,13 @@ int main(int arg_count, char* argument_vector[]) {
 
     string arg = arguments[1];
 
-    if(arg == "--help" or arg == "-h") {
-        showHelp(cout);
-        return 0;
+    for(const std::string &it : arguments) {
+        if(it == "--help" or it == "-h" or it == "-H") {
+            showHelp(cout);
+            return 0;
+        }
     }
+
 
     if(DEBUG_MODE) {
         cout << "Argumentos lidos da entrada: \n";
@@ -47,15 +50,15 @@ int main(int arg_count, char* argument_vector[]) {
     // std::cin >> caminho;
 
 
-    if(find(arguments.begin(), arguments.end(), "-l") != arguments.end()) {
+    if(find(arguments.begin(), arguments.end(), "-l") != arguments.end() or find(arguments.begin(), arguments.end(), "-L") != arguments.end()) {
         caminho = arg;
         ClassFile teste = readClassFile(caminho);
         showClassFile(teste, cout);    
     }
 
     else {
-        cout << "-----------------------------------------------------------------------------------------\n";
-        cout << "---------------------------------- Execucao da JVM --------------------------------------\n";
+        cout << "--------------------------------------\n";
+        cout << "--------- Execucao do a JVM ----------\n";
         caminho = arguments[1];
         
         if(DEBUG_MODE) {
@@ -65,10 +68,7 @@ int main(int arg_count, char* argument_vector[]) {
         execution_engine* exec_eng = new execution_engine(caminho);
 
         exec_eng->run();
-        cout << "\n\n-----------------------------------------------------------------------------------------";
-        cout << "--------------------------- Arquivo executado com sucesso! -----------------------------\n";
-        cout << "-----------------------------------------------------------------------------------------\n\n";
-
+        cout << "\n--------------------------------------\n";
     }
 
 

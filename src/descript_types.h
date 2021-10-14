@@ -2,7 +2,7 @@
 * \file \src\descript_types.h
 * \version 0.1
 * \date 12/10/2021
-* \brief 
+* \brief Contem as definicoes de tipos de objetos e arrays.
 * \remarks None
 * 
 * 
@@ -20,7 +20,8 @@ enum FIELD_TYPES {
     // ARRAY_REF_TYPE,
     // ARRAY_BASE_TYPE,
     STRING_TYPE,
-    CLASS_REF_TYPE
+    CLASS_REF_TYPE,
+    NULL_REF
 };
 
 enum ARRAY_TYPES {

@@ -31,6 +31,12 @@
 #include "descript_types.h"
 #include "someTools.h"
 
+/**
+ * @brief Armazena o endereco de uma instrucao da JVM.
+ *
+ * @since	v0.0.1
+ * @global
+ */
 class pc_register {
 
     private:
@@ -42,9 +48,24 @@ class pc_register {
         ~pc_register() = default;
         int get_pc() const ;
         
+        /**
+         * @brief Incrementa o valor de pc por 1.
+         *
+         */
         void increment_pc();
+
+        /**
+         * @brief Incrementa o valor de pc pelo valor recebido.
+         * 
+         */
         void increment_pc(const int &);
 
+        /**
+         * @brief Incrementa o valor de pc pelo valor recebido. Retorna o resultado da 
+         * operacao.
+         * 
+         * @return int 
+         */
         int get_next_pc(const int &);
 
         // void operator+(const int &v) { this->increment_pc(v); }
@@ -53,6 +74,11 @@ class pc_register {
         void operator=(const pc_register &pc_v) { this->set_pc(pc_v.get_pc()); }
 };
 
+/**
+ * @class jvm_stack 
+ * @brief Classe que armazena os frames da jvm.
+ * 
+ */
 class jvm_stack {
 
     class frame* top_frame = nullptr;
@@ -64,14 +90,41 @@ class jvm_stack {
 
         jvm_stack() = default;
         ~jvm_stack();
+
+        /**
+         * @brief Retorna o tamanho total da pilha de frames.
+         * 
+         * @return size_t 
+         */
         size_t size() { return this->stack_size; };
 
+        /**
+         * @brief Armazena o ponteiro no topo da pilha de operandos na pilha atual.
+         * 
+         */
         void push(class frame*);
+
+        /**
+         * @brief Retira o frame do topo da pilha interna. Efetivamente destroi os dados 
+         * do frame no topo da pilha. 
+         * 
+         */
         void pop();
+        /**
+         * @brief Retorna uma referencia para o frame no topo da pilha.
+         * 
+         * @return frame& 
+         */
         class frame &top() { return *(this->top_frame); };
 
 };
 
+
+/**
+ * @brief Classe utilizada para armazenar os dados de uma classe, representada por um classfile. 
+ * Armazena os metodos, dados de fields e os fields estaticos.
+ * 
+ */
 class class_space {
 
     private:
@@ -96,6 +149,11 @@ class class_space {
             }
         }
 
+        /**
+         * @brief Mapa que contem os dados de um fields estaticos. A chave indica o nome do 
+         * field.
+         * 
+         */
         std::map<std::string, Field_t*> fields_data; // <- Contem os fields estaticos
 
         const std::vector<method_info> *methods_info;
@@ -111,25 +169,78 @@ class class_space {
         class_space() = default;
         ~class_space();
 
+        /**
+         * @brief Get the method object.
+         * 
+         * @param method_ref 
+         * @return method_info 
+         */
         method_info get_method(const cp_info &method_ref);
 
+        /**
+         * @brief Get the method object
+         * 
+         * @param method_idx 
+         * @return method_info 
+         */
         method_info get_method(const size_t &method_idx) { return this->methods_info->at(method_idx); }
+        
+        /**
+         * @brief Get the field info object
+         * 
+         * @param field_idx 
+         * @return field_info 
+         */
         field_info  get_field_info(const size_t field_idx) { return this->fields_info->at(field_idx); }
 
-        
+        /**
+         * @brief Get the class file object
+         * 
+         * @return const ClassFile& 
+         */
         const ClassFile &get_class_file() const { return *(this->my_classfile); }
 
+        /**
+         * @brief Get the class field object
+         * 
+         * @param name_idx 
+         * @return Field_t* 
+         */
         Field_t *get_class_field(const u2 &name_idx);
+
+        /**
+         * @brief Get the class field object
+         * 
+         * @param field_ref 
+         * @return Field_t* 
+         */
         Field_t *get_class_field(const cp_info &field_ref); // <- Talvez arrumar !!!!!!!!!!!!!!!!!!!!!
+
+        /**
+         * @brief Get the const pool object
+         * 
+         * @return std::vector<cp_info>& 
+         */
         std::vector<cp_info> &get_const_pool() { return this->my_classfile->constant_pool; }; // When call this function, do not alter the result!!! 
 
+        /**
+         * @brief Construct a new class space object
+         * 
+         * @param cp 
+         */
         class_space(const class_space &cp) {
             *this = cp;
         }
+
         class class_space&operator=(const class_space& cp);
 };
 
-class method_area { // <- Arrumar
+/**
+ * @brief Area de metodos da JVM. Armazena as classes carregadas.
+ * 
+ * @sa class_space
+ */
+class method_area {
 
     std::map<std::string, class_space> classes;
 
@@ -140,55 +251,147 @@ class method_area { // <- Arrumar
 
     public:
     
+        /**
+         * @brief Procura e retorna uma referencia para uma classe, recebendo o nome dela.
+         * Pode lancar excecoes caso a classe nao esteja carregada.
+         * 
+         * @param class_name 
+         * @return class_space& 
+         */
         class_space &get_class(const std::string &class_name); // <- Apenas recupera a classe, sem verificar flags de acesso
         method_area() = default;
         method_area(const std::string &_class_path) {
             this->load_class(_class_path);
         }
 
+        /**
+         * @brief Retorna um metodo de uma classe. Pode lancar excecoes, caso a classe requerida nao 
+         * esteja carregada.
+         * 
+         * @param class_name 
+         * @param name_and_type 
+         * @return const method_info& 
+         */
         const method_info &get_method(const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
 
         ~method_area() = default;
         
+        /**
+         * @brief Constroi uma nova classe, a partir da referencia de class file recebida. 
+         * 
+         */
         void insert_new_class(ClassFile*);
         // method_info get_method();
+
+        /**
+         * @brief Retira uma classe. Indicada pelo nome recebido.
+         * 
+         * @param class_name 
+         */
         void remove_class(const std::string& class_name);
 
         // template<class T>
         // T &get_item(const cp_info &ref_item); // <-- provisorio (ainda nao implementado)
 
-
+        /**
+         * @brief Retorna uma classe, indicada pelo seu nome. A classe sera carregada caso nao esteja.
+         * Verifica as flags de acesso a partir da classe chamadora. 
+         * 
+         * @param calling_class 
+         * @param class_name 
+         * @return class_space& 
+         */
         class_space &get_class(class_space* calling_class, const std::string &class_name); // <-- Carrega a classe se ela ainda nao ta na area de metodos
         //              ^
         //              |
         //              |
         // Talvez arrumar para considerar arrays!!!
 
+        /**
+         * @brief Retorna um field de classe, indicado pelo nome da classe. Carrega a classe, caso a mesma nao esteja na area 
+         * de metodos. Verifica as flags de acesso da classe chamada. Pode lancar excecoes. 
+         * 
+         * @param calling_class 
+         * @param class_name 
+         * @param name_and_type 
+         * @param from_object 
+         * @return Field_t& 
+         */
         Field_t &get_class_field(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string>& name_and_type, bool from_object = false);
 
+        /**
+         * @brief Retorna todos os fields de um novo objeto. Carrega as classes, superclasses e interfaces da classe 
+         * que o objeto representa, e retorna os fields encontrados nessas classes, caso nao sejam estaticos.
+         * 
+         * @param calling_class 
+         * @param class_name 
+         * @param to_return_fields 
+         */
         void get_fields_from_obj(class_space *calling_class, const std::string &class_name, std::vector<std::pair<std::string, Field_t*>> &to_return_fields);
 
+        /**
+         * @brief Retorna um metodo de classe, verificando as flags de acesso a classe chamada. Carrega a classe chamada 
+         * caso a mesma nao esteja carregada.
+         * 
+         * @param calling_class 
+         * @param class_name 
+         * @param name_and_type 
+         * @return method_info 
+         */
         method_info get_class_method(class_space *calling_class, const std::string &class_name, const std::pair<std::string, std::string> &name_and_type);
 
+
+        /**
+         * @brief Retorna um metodo de interface, de acordo com o processo especificado no manual 
+         * da JVM 8. Encontre este no site da Oracle.
+         * 
+         * @param calling_class 
+         * @param interface_name 
+         * @param name_and_type 
+         * @return method_info 
+         */
         method_info get_interface_method(class_space *calling_class, const std::string &interface_name, const std::pair<std::string, std::string> &name_and_type);
 
+        /**
+         * @brief Carrega uma classe, a partir do caminho recebido.
+         * 
+         * @param _class_path 
+         */
         void load_class(const std::string &_class_path);
 
+        /**
+         * @brief Verifica se uma dada classe esta carregada.
+         * 
+         * @param _class_path 
+         * @return true 
+         * @return false 
+         */
         bool is_loaded(const std::string &_class_path) {
 
-            for(const auto &it : this->classes) {
-                if(_class_path.find(it.first) != std::string::npos) {
-                    return true;
-                }
-            }
+            // for(const auto &it : this->classes) {
+            //     if(not _class_path.compare(it.first)) {
+            //         return true;
+            //     }
+            // }
 
-            return false;
+            return this->classes.count(_class_path) > 0;
         };
         
+        /**
+         * @brief Retorna a quantidade de classes carregadas.
+         * 
+         * @return size_t 
+         */
         size_t size() { return classes.size(); };
 
 };
 
+/**
+ * @brief Armazena os dados de uma frame. Contem um vetor de variaveis locais, a pilha de operandos, 
+ * uma referencia para o pool de constantes, e uma referencia para o espaco da classe.
+ * 
+ * @sa class_space, ClassFile
+ */
 class frame {
 
     private:
@@ -266,6 +469,10 @@ class frame {
 };
 
 
+/**
+ * @brief Armazena os objetos alocados dinamicamente da JVM.
+ * 
+ */
 class heap {
 
     private:
