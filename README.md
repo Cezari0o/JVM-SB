@@ -1,6 +1,6 @@
 # Java Virtual Machine
 
-Contem a implementação da JVM para a disciplina Software Basico 
+Contém a implementação da JVM para a disciplina Software Básico 
 da Universidade de Brasilia. Para compilar e gerar a maquina virtual, 
 utilize a seguinte linha:
 ```
